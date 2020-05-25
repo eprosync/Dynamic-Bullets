@@ -238,6 +238,114 @@ function DynamicBullets:DynamicBullets(owner, SWEP, pos, vel)
 		return math.Round(CurTime())
 	end
 
+
+    --[[
+        Creates a seed for randomizers
+		Set to curtime for now till I find a better solution
+    ]]
+	function DynamicBul:CanPenetrate(trace, dot)
+		local weaponattributes = self.weaponattributes
+		return (weaponattributes.CanPenetrate and not weaponattributes.NoPenetration[trace.MatType] and dot > 0.26 and self.LayersPenetrated < 4)
+	end
+
+    --[[
+        Creates a seed for randomizers
+		Set to curtime for now till I find a better solution
+    ]]
+	function DynamicBul:PenetrateSurface(trace, dot)
+		local weaponattributes = self.weaponattributes
+		local penlen, hit_pos = weaponattributes.PenetrationStrength * (weaponattributes.PenetrationSurfaces[trace.MatType] and weaponattributes.PenetrationSurfaces[trace.MatType] or 1), trace.HitPos
+		local tr = {}
+		tr.start = hit_pos
+		tr.endpos = tr.start + dir * penlen
+		tr.filter = {
+			self.owner,
+			(trace.Entity or nil)
+		}
+		tr.mask = trace_normal
+		tr.ignoreworld = true
+
+		trace = util.TraceLine(tr)
+
+		--Check the surface if it's actually there
+		--Also check on where the bullet should come out.
+
+		tr.start = trace.HitPos
+		tr.endpos = tr.start - dir * penlen * 1.1
+		tr.filter = {
+			self.owner,
+			(trace.Entity or nil)
+		}
+		tr.mask = trace_normal
+		tr.ignoreworld = false
+
+		trace = util.TraceLine(tr)
+		
+		if trace.Hit and trace.HitPos != tr.endpos and trace.HitPos != tr.start then
+
+			local penDist = (penlen - trace.HitPos:Distance(hit_pos))
+
+			bul.Num = 1
+			bul.Src = trace.HitPos + dir * 0.01
+			bul.Dir = -dir
+			bul.Spread 	= Vec0
+			bul.Tracer	= 0
+			bul.Force	= 0
+			bul.Damage = 0
+
+			self.owner:FireBullets(bul, true) -- Damage effect on walls n shit.
+
+			-- Set position to out point, calculate our new velocity based on the distance we penetrated through
+			self.pos = trace.HitPos
+			weaponattributes.force = weaponattributes.force * (penDist / penlen) * 0.75
+			weaponattributes.dmgmul = weaponattributes.dmgmul * (penDist / penlen) * 0.75
+			self.vel = newvel * (penDist / penlen) * 0.85
+			self.LayersPenetrated = self.LayersPenetrated + 1
+		else
+			return true 
+		end
+	end
+
+    --[[
+        Creates a seed for randomizers
+		Set to curtime for now till I find a better solution
+    ]]
+	function DynamicBul:CanRicochet(trace, dot)
+		local weaponattributes = self.weaponattributes
+		return (weaponattributes.CanRicochet and not weaponattributes.NoRicochet[trace.MatType] and weaponattributes.PenetrationRange * trace.Fraction < weaponattributes.PenetrationRange and dot < 0.26)
+	end
+
+    --[[
+        Creates a seed for randomizers
+		Set to curtime for now till I find a better solution
+    ]]
+	function DynamicBul:RicochetSurface(trace, dot)
+		local weaponattributes = self.weaponattributes
+		dir = dir + (trace.HitNormal * dot) * 2
+		local vec = Vector()
+		math.randomseed(self:RandSeed())
+		vec.x = math.random(-1000, 1000) * .001
+		math.randomseed(self:RandSeed()+1)
+		vec.y = math.random(-1000, 1000) * .001
+		math.randomseed(self:RandSeed()+2)
+		vec.z = math.random(-1000, 1000) * .001
+		dir = dir + vec * 0.03
+		local magnitude = newvel:Length()
+		self.pos = trace.HitPos + dir
+		weaponattributes.force = weaponattributes.force * 0.225
+		weaponattributes.dmgmul = weaponattributes.dmgmul * 0.75
+		self.vel = (dir * magnitude) * 0.75
+		if CLIENT then
+			local pos = EyePos()
+			if GetViewEntity() ~= LocalPlayer() then
+				pos = GetViewEntity():GetPos()
+			end
+			if pos:DistToSqr(self.pos) < 60000 then
+				EmitSound( ricochet[math.random(#ricochet)], self.pos, -1, CHAN_AUTO, 1, 45, 0, 100 )
+			end
+		end
+	end
+
     --[[
         Calculates what to damage and where the bullet will be,
         as well as any other forces applied to it.
@@ -330,98 +438,12 @@ function DynamicBullets:DynamicBullets(owner, SWEP, pos, vel)
 
             -- check if the surface we hit can be penetrated at an angle.
 			local dot = -dir:DotProduct(trace.HitNormal)
-			if not self.weaponattributes.NoPenetration[trace.MatType] then
-				local weaponattributes = self.weaponattributes
-				if dot > 0.26 then
-					if weaponattributes.CanPenetrate then
-						if self.LayersPenetrated > 4 then return true end
-						local penlen, hit_pos = weaponattributes.PenetrationStrength * (weaponattributes.PenetrationSurfaces[trace.MatType] and weaponattributes.PenetrationSurfaces[trace.MatType] or 1), trace.HitPos
-						local tr = {}
-						tr.start = hit_pos
-						tr.endpos = tr.start + dir * penlen
-						tr.filter = {
-							self.owner,
-							(trace.Entity or nil)
-						}
-						tr.mask = trace_normal
-						tr.ignoreworld = true
-
-						trace = util.TraceLine(tr)
-
-						--Check the surface if it's actually there
-						--Also check on where the bullet should come out.
-
-						tr.start = trace.HitPos
-						tr.endpos = tr.start - dir * penlen * 1.1
-						tr.filter = {
-							self.owner,
-							(trace.Entity or nil)
-						}
-						tr.mask = trace_normal
-						tr.ignoreworld = false
-
-						trace = util.TraceLine(tr)
-						
-						if trace.Hit and trace.HitPos != tr.endpos and trace.HitPos != tr.start then
-
-							local penDist = (penlen - trace.HitPos:Distance(hit_pos))
-
-							bul.Num = 1
-							bul.Src = trace.HitPos + dir * 0.01
-							bul.Dir = -dir
-							bul.Spread 	= Vec0
-							bul.Tracer	= 0
-							bul.Force	= 0
-							bul.Damage = 0
-
-							self.owner:FireBullets(bul, true) -- Damage effect on walls n shit.
-
-							-- Set position to out point, calculate our new velocity based on the distance we penetrated through
-							self.pos = trace.HitPos
-							weaponattributes.force = weaponattributes.force * (penDist / penlen) * 0.75
-							weaponattributes.dmgmul = weaponattributes.dmgmul * (penDist / penlen) * 0.75
-							self.vel = newvel * (penDist / penlen) * 0.85
-							self.LayersPenetrated = self.LayersPenetrated + 1
-						else
-							return true 
-						end
-					else
-						return true
-					end
-				else
-					if weaponattributes.CanRicochet then
-						if not NoRicochet[trace.MatType] and weaponattributes.PenetrationRange * trace.Fraction < weaponattributes.PenetrationRange then
-							dir = dir + (trace.HitNormal * dot) * 2
-							local vec = Vector()
-							math.randomseed(self:RandSeed())
-							vec.x = math.random(-1, 1)
-							math.randomseed(self:RandSeed()+1)
-							vec.y = math.random(-1, 1)
-							math.randomseed(self:RandSeed()+2)
-							vec.z = math.random(-1, 1)
-							dir = dir + vec * 0.03
-                            local magnitude = newvel:Length()
-							self.pos = trace.HitPos + dir
-							weaponattributes.force = weaponattributes.force * 0.225
-							weaponattributes.dmgmul = weaponattributes.dmgmul * 0.75
-							self.vel = (dir * magnitude) * 0.75
-
-							if CLIENT then
-								local pos = EyePos()
-								if GetViewEntity() ~= LocalPlayer() then
-									pos = GetViewEntity():GetPos()
-								end
-								if pos:DistToSqr(self.pos) < 60000 then
-									EmitSound( ricochet[math.random(#ricochet)], self.pos, -1, CHAN_AUTO, 1, 45, 0, 100 )
-								end
-							end
-						else
-							return true 
-						end
-					else
-						return true 
-					end
-				end
+			if self:CanPenetrate(trace, dot) then
+				local died = self:PenetrateSurface(trace, dot)
+				if died ~= nil then return died end
+			elseif self:CanRicochet(trace, dot) then
+				local died = self:RicochetSurface(trace, dot)
+				if died ~= nil then return died end
 			end
 		end
 		if self.time >= self.life then
