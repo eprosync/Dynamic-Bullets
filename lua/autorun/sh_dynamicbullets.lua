@@ -7,12 +7,6 @@
     When i mean imaginary i mean they aren't actually particles.
     but still interact with the physical world with force.
 	This is what happens when a developer get's bored
-
-	Current bugs,
-		Multi-layered props causes bullets to just not penetrate (This is driving me insane)
-
-	Major Issues,
-		Sync function for attribute networking using too much that is intended (5 kb higher than my standards)
 ]]
 
 DynamicBullets = {}
