@@ -287,7 +287,7 @@ function DynamicBullets:DynamicBullets(owner, SWEP, pos, vel)
 				if died ~= nil then return died end
 			end
 		end
-		if self.time >= self.life then
+		if self.curtime >= self.life then
 			return true
 		end
 		if self.weaponattributes.dmgmul < 0.01 then
