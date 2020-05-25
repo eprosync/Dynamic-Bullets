@@ -53,9 +53,6 @@ end
 
 -- Stuff from the original weapon base of CW 2.0, Sleek Weapon Base
 -- Love your stuff, Spy
-local trace_normal = bit.bor(CONTENTS_SOLID, CONTENTS_OPAQUE, CONTENTS_MOVEABLE, CONTENTS_DEBRIS, CONTENTS_MONSTER, CONTENTS_HITBOX)
-local trace_walls = bit.bor(CONTENTS_TESTFOGVOLUME, CONTENTS_EMPTY, CONTENTS_MONSTER, CONTENTS_HITBOX)
-
 local NoPenetration = {
 	[MAT_SLOSH] = true
 }

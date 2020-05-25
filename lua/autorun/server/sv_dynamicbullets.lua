@@ -3,6 +3,8 @@ local Vec0 = Vector()
 
 util.AddNetworkString('DynamicBullets.Fired')
 
+local trace_normal = bit.bor(CONTENTS_SOLID, CONTENTS_OPAQUE, CONTENTS_MOVEABLE, CONTENTS_DEBRIS, CONTENTS_MONSTER, CONTENTS_HITBOX)
+
 -- Create functions and information for a specific bullet.
 function DynamicBullets:DynamicBullets(owner, SWEP, pos, vel)
 	local DynamicBul = table.Copy(DynamicBullets.BulletStruct)

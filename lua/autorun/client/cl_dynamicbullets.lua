@@ -36,6 +36,8 @@ BulletStruct.render = { -- simple rendering stuff, make bullets fancy :D
 local entries = DynamicBullets.BulletEntries
 local Vec0 = Vector()
 
+local trace_normal = bit.bor(CONTENTS_SOLID, CONTENTS_OPAQUE, CONTENTS_MOVEABLE, CONTENTS_DEBRIS, CONTENTS_MONSTER, CONTENTS_HITBOX)
+
 -- Create functions and information for a specific bullet.
 function DynamicBullets:DynamicBullets(owner, SWEP, pos, vel)
 	local DynamicBul = table.Copy(DynamicBullets.BulletStruct)
