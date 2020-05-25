@@ -54,7 +54,7 @@ function bullet:PhysicCalc()
  local pl
  table.sort( _ents, function(a, b) return self.pos:DistToSqr(a:GetPos()) < self.pos:DistToSqr(b:GetPos()) end )
  for i=1, #_ents do
-  if _ents[i]:IsPlayer() and _ents[i] ~= self.owner then
+  if _ents[i]:IsPlayer() and _ents[i] ~= self.owner and _ents[i]:Alive() then
    pl = _ents[i]
    break
   end
