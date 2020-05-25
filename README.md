@@ -1,7 +1,10 @@
+![GitHub issues](https://img.shields.io/github/issues/eprosync/Dynamic-Bullets)
 # Dynamic-Bullets
  Yes, very dynamic!
  * I'll make a wiki for all the stuff later on
- 
+# This is a work in progress addition to all weapon bases!
+ Expect some major bugs and issues!
+
 # How to get this working on your weapon base!
  Since some weapon bases vary on how bullets even functions, I'll let you decide
  Some examples on how to use this properly
