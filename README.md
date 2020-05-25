@@ -47,18 +47,21 @@ DynamicBullets:FireBullet(self.Owner, self, sp, Dir2, function(bullet)
 end)
 ```
  An example of homing bullets with proximity and other factors affecting the bullet
+ This however requires a tick of 24 minimum to work, which is why I added "MultiCalc" as a config.
+ Which allows you to add to the current server tickrate to make things more accurate
+ at the cost of performance of course.
 ```
 local old_physcalc = bullet.PhysicCalc
 function bullet:PhysicCalc()
- local _ents = ents.FindInCone( self.pos, self.vel:GetNormalized(), 500, math.cos( math.rad( 10 ) ) )
- local pl
- table.sort( _ents, function(a, b) return self.pos:DistToSqr(a:GetPos()) < self.pos:DistToSqr(b:GetPos()) end )
+ local _ents = ents.FindInCone( self.pos, self.vel:GetNormalized(), 750, math.cos( math.rad( 10 ) ) )
+ local pl = {}
  for i=1, #_ents do
   if _ents[i]:IsPlayer() and _ents[i] ~= self.owner and _ents[i]:Alive() then
-   pl = _ents[i]
-   break
+   pl[#pl + 1] = _ents[i]
   end
  end
+ table.sort( pl, function(a, b) return self.pos:DistToSqr(a:GetPos()) < self.pos:DistToSqr(b:GetPos()) end )
+ pl = pl[1]
  local acc, displace, newvel, dir = old_physcalc(self)
  if pl then
   local targetpos = (pl:GetPos() + pl:OBBCenter())
