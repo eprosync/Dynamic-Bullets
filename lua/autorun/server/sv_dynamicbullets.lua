@@ -164,7 +164,7 @@ function DynamicBullets:DynamicBullets(owner, SWEP, pos, vel)
 			local penDist = (penlen - trace.HitPos:Distance(hit_pos))
 			weaponattributes.force = weaponattributes.force * (penDist / penlen) * 0.75
 			weaponattributes.dmgmul = weaponattributes.dmgmul * (penDist / penlen) * 0.75
-			self.vel = newvel * (penDist / penlen) * 0.85
+			self.vel = self.vel * (penDist / penlen) * 0.85
 
 			self.LayersPenetrated = self.LayersPenetrated + 1
 		else
@@ -194,7 +194,7 @@ function DynamicBullets:DynamicBullets(owner, SWEP, pos, vel)
 		math.randomseed(self:RandSeed()+2)
 		vec.z = math.random(-1000, 1000) * .001
 		dir = dir + vec * 0.03
-		local magnitude = newvel:Length()
+		local magnitude = self.vel:Length()
 		self.pos = trace.HitPos + dir
 		weaponattributes.force = weaponattributes.force * 0.225
 		weaponattributes.dmgmul = weaponattributes.dmgmul * 0.75
