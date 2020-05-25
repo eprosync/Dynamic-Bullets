@@ -1,4 +1,6 @@
 ![GitHub issues](https://img.shields.io/github/issues/eprosync/Dynamic-Bullets)
+![GitHub](https://img.shields.io/github/license/eprosync/Dynamic-Bullets)
+
 # Dynamic-Bullets
  Yes, very dynamic!
  * I'll make a wiki for all the stuff later on
