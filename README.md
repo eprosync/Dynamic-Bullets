@@ -46,6 +46,27 @@ DynamicBullets:FireBullet(self.Owner, self, sp, Dir2, function(bullet)
  bullet:EnableRicochet(self.CanRicochet)
 end)
 ```
+ An example of homing bullets with proximity and other factors affecting the bullet
+```
+local old_physcalc = bullet.PhysicCalc
+function bullet:PhysicCalc()
+ local _ents = ents.FindInCone( self.pos, self.vel:GetNormalized(), 500, math.cos( math.rad( 10 ) ) )
+ local pl
+ table.sort( _ents, function(a, b) return self.pos:DistToSqr(a:GetPos()) < self.pos:DistToSqr(b:GetPos()) end )
+ for i=1, #_ents do
+  if _ents[i]:IsPlayer() and _ents[i] ~= self.owner then
+   pl = _ents[i]
+   break
+  end
+ end
+ local acc, displace, newvel, dir = old_physcalc(self)
+ if pl then
+  local targetpos = (pl:GetPos() + pl:OBBCenter())
+  newvel = (newvel*.75) + (targetpos - self.pos):GetNormalized() * ((1/targetpos:Distance(self.pos))*500000)
+ end
+ return acc, displace, newvel, dir
+end
+```
 
 ## License
 
