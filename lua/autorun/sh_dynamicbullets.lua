@@ -286,7 +286,7 @@ function DynamicBullets:DynamicBullets(owner, SWEP, pos, vel)
 				if GetViewEntity() ~= LocalPlayer() then
 					pos = GetViewEntity():GetPos()
 				end
-				if pos:DistToSqr(self.pos) < 10000 then
+				if pos:DistToSqr(self.pos) < 5000 then
 					self.swish = true
 					EmitSound( nearmiss[math.random(#nearmiss)], self.pos, -1, CHAN_AUTO, 1, 45, 0, 100 )
 				end
