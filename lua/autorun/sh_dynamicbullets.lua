@@ -14,7 +14,7 @@
 	Keep in mind however I am not as active as you may think on github.
 ]]
 
-DynamicBullets = {}
+DynamicBullets = DynamicBullets or {}
 
 -- 9.8 m/s^2 is the acceleration of gravity on earth.
 -- In hammer it's about 514 units/s^2
@@ -26,7 +26,7 @@ DynamicBullets.Fg = Vector(0, 0, -(4 * 514.43569553806)) -- This is acceleration
 DynamicBullets.MultiCalc = 17
 
 -- For debugging bullet travel and velocity
-DynamicBullets.Debug = false
+DynamicBullets.Debug = true
 
 --[[
     Eqn,
@@ -83,7 +83,7 @@ DynamicBullets.DebugTable = {}
 -- Got the idea from roblox's particle system
 -- So yea basically physical bullets are particles that can interact with the world
 -- Even with high ping since lag compensation is neato
-local BulletStruct = {}
+local BulletStruct = DynamicBullets.BulletStruct or {}
 BulletStruct.time = 0
 BulletStruct.lasttime = 0
 BulletStruct.curtime = 0
