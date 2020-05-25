@@ -1,5 +1,6 @@
 # Dynamic-Bullets
  Yes, very dynamic!
+ * I'll make a wiki for all the stuff later on
  
 # How to get this working on your weapon base!
  Since some weapon bases vary on how bullets even functions, I'll let you decide
