@@ -22,6 +22,7 @@ local ricochet = {
 }
 
 local BulletStruct = DynamicBullets.BulletStruct
+local max_renderdistance = 5000*5000
 
 BulletStruct.Sounds = {
 	NearMiss = nearmiss,
@@ -542,6 +543,7 @@ hook.Add('PreDrawTranslucentRenderables', 'DynamicBullets.Render', function()
     for k = 1, #entries do
         local v = entries[k]
         if v.curtime < enginetick/6 then continue end
+		if v.pos:DistToSqr(EyePos()) > max_renderdistance then continue end
         if v.renderer then
             v.renderer()
             return
