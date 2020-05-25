@@ -340,7 +340,7 @@ function DynamicBullets:DynamicBullets(owner, SWEP, pos, vel)
 			end
 
 			--Effects n stuff, neato
-			self:EffectSurface(self.pos, dir, _dist)
+			self:EffectSurface(self.lastpos, dir, _dist)
 
             -- Well we hit something, let's fuck it up yea?
 			if trace.Entity && IsValid(trace.Entity) && trace.Entity.TakeDamageInfo then
