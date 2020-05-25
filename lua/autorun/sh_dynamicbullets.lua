@@ -7,6 +7,11 @@
     When i mean imaginary i mean they aren't actually particles.
     but still interact with the physical world with force.
 	This is what happens when a developer get's bored
+
+	If you would want to support this, please refer to my github 
+	https://github.com/eprosync/Dynamic-Bullets
+	You may make forks, issues, and suggestions there.
+	Keep in mind however I am not as active as you may think on github.
 ]]
 
 DynamicBullets = {}
@@ -17,7 +22,7 @@ DynamicBullets.Fg = Vector(0, 0, -(4 * 514.43569553806)) -- This is acceleration
 
 -- Distributes curtime into multiple calculation instances.
 -- This allows more accurate calculations for when hitting objects and etc.
--- I suggest doing this when at a low tick like 33 - 11
+-- I suggest doing this when at a low tick like 33 - 11 as this will increase the need for more resources
 DynamicBullets.MultiCalc = 17
 
 -- For debugging bullet travel and velocity
@@ -36,6 +41,10 @@ DynamicBullets.Debug = false
     d = vi(t) + 1/2(a)(t)^2 -- mising vf
     d = 1/2(vi + vf)(t) -- mising a
     d = vf(t) - 1/2(a)(t)^2 -- mising vi
+
+	Use these for your modifications also,
+	they are VERY important for this entire system to work.
+	Ty GR 11/12 physics teacher :)
 --]]
 
 local function Fprint(s)
@@ -106,6 +115,11 @@ BulletStruct.distancetraveled = 0
 BulletStruct.life = 1.5
 BulletStruct.LayersPenetrated = 0 -- If we need to limit out penetrations which we should.
 
+BulletStruct.Sounds = {
+	NearMiss = nearmiss,
+	Ricochet = ricochet,
+}
+
 BulletStruct.render = { -- simple rendering stuff, make bullets fancy :D
 	lerpvec = false,
 	lerplastvec = false,
@@ -147,6 +161,7 @@ function DynamicBullets:DynamicBullets(owner, SWEP, pos, vel)
 	local dir = vel:GetNormalized()
 
 	-- Methods
+	-- I would add more, but... just fucking modify the values raw instead, it's better than calling a function :D
 
     --[[
         Set's the velocity
@@ -221,6 +236,10 @@ function DynamicBullets:DynamicBullets(owner, SWEP, pos, vel)
 		you can do so through here.
 
 		This is the core of dynamic bullets essentially
+
+		If your planning on making things like homing bullets and etc,
+		do a lot of testing with debug mode on, you may hit some lag compensation/prediction errors
+		as this entire system is very delicate with it.
     ]]
 	function DynamicBul:PhysicCalc()
 		local acc = .5 * DynamicBullets.Fg * (self.time * self.time)
@@ -238,10 +257,8 @@ function DynamicBullets:DynamicBullets(owner, SWEP, pos, vel)
 		return math.Round(CurTime())
 	end
 
-
     --[[
-        Creates a seed for randomizers
-		Set to curtime for now till I find a better solution
+        can we penetrate?
     ]]
 	function DynamicBul:CanPenetrate(trace, dot)
 		local weaponattributes = self.weaponattributes
@@ -249,11 +266,11 @@ function DynamicBullets:DynamicBullets(owner, SWEP, pos, vel)
 	end
 
     --[[
-        Creates a seed for randomizers
-		Set to curtime for now till I find a better solution
+        Penetrate a surface
     ]]
 	function DynamicBul:PenetrateSurface(trace, dot)
 		local weaponattributes = self.weaponattributes
+		local dir = self.dir
 		local penlen, hit_pos = weaponattributes.PenetrationStrength * (weaponattributes.PenetrationSurfaces[trace.MatType] and weaponattributes.PenetrationSurfaces[trace.MatType] or 1), trace.HitPos
 		local tr = {}
 		tr.start = hit_pos
@@ -282,24 +299,16 @@ function DynamicBullets:DynamicBullets(owner, SWEP, pos, vel)
 		trace = util.TraceLine(tr)
 		
 		if trace.Hit and trace.HitPos != tr.endpos and trace.HitPos != tr.start then
-
-			local penDist = (penlen - trace.HitPos:Distance(hit_pos))
-
-			bul.Num = 1
-			bul.Src = trace.HitPos + dir * 0.01
-			bul.Dir = -dir
-			bul.Spread 	= Vec0
-			bul.Tracer	= 0
-			bul.Force	= 0
-			bul.Damage = 0
-
-			self.owner:FireBullets(bul, true) -- Damage effect on walls n shit.
+			self:EffectSurface(trace.HitPos + dir * 0.01, -dir, 1)
 
 			-- Set position to out point, calculate our new velocity based on the distance we penetrated through
 			self.pos = trace.HitPos
+
+			local penDist = (penlen - trace.HitPos:Distance(hit_pos))
 			weaponattributes.force = weaponattributes.force * (penDist / penlen) * 0.75
 			weaponattributes.dmgmul = weaponattributes.dmgmul * (penDist / penlen) * 0.75
 			self.vel = newvel * (penDist / penlen) * 0.85
+
 			self.LayersPenetrated = self.LayersPenetrated + 1
 		else
 			return true 
@@ -307,17 +316,29 @@ function DynamicBullets:DynamicBullets(owner, SWEP, pos, vel)
 	end
 
     --[[
-        Creates a seed for randomizers
-		Set to curtime for now till I find a better solution
+        Can we ricochet on a surface?
     ]]
 	function DynamicBul:CanRicochet(trace, dot)
 		local weaponattributes = self.weaponattributes
 		return (weaponattributes.CanRicochet and not weaponattributes.NoRicochet[trace.MatType] and weaponattributes.PenetrationRange * trace.Fraction < weaponattributes.PenetrationRange and dot < 0.26)
 	end
 
+	--[[
+		Ping!
+	]]
+	function DynamicBul:RicochetSound()	
+		local pos = EyePos()
+		if GetViewEntity() ~= LocalPlayer() then
+			pos = GetViewEntity():GetPos()
+		end
+		if pos:DistToSqr(self.pos) < 60000 then
+			local tbl = self.Sounds.Ricochet
+			EmitSound( tbl[math.random(#tbl)], self.pos, -1, CHAN_AUTO, 1, 45, 0, 100 )
+		end
+	end
+
     --[[
-        Creates a seed for randomizers
-		Set to curtime for now till I find a better solution
+        Ricochet the surface
     ]]
 	function DynamicBul:RicochetSurface(trace, dot)
 		local weaponattributes = self.weaponattributes
@@ -336,12 +357,62 @@ function DynamicBullets:DynamicBullets(owner, SWEP, pos, vel)
 		weaponattributes.dmgmul = weaponattributes.dmgmul * 0.75
 		self.vel = (dir * magnitude) * 0.75
 		if CLIENT then
+			self:RicochetSound()
+		end
+	end
+
+    --[[
+        Entity take damage,
+		Modify this to however you feel,
+		nobody is stopping you :D
+    ]]
+	function DynamicBul:DamageEntity(trace)
+		-- Calculate the bullet damage based on the distance travelled
+		local dmg = self:CalculateDamage(self.distancetraveled)
+
+		-- Mimics damage taken from engine bullets
+		local dmginfo = DamageInfo()
+		local magnitude = self.vel:Length()
+		dmginfo:SetAttacker( self.owner )
+		dmginfo:SetInflictor( self.inflictor )
+		dmginfo:SetDamage( dmg )
+		dmginfo:SetDamageType( DMG_BULLET )
+		dmginfo:SetDamageForce( dir * (magnitude * (1/dmg)) )
+		dmginfo:SetDamagePosition( trace.HitPos )
+		trace.Entity:TakeDamageInfo( dmginfo )
+	end
+
+    --[[
+        Decals and effects for when the bullet hits something...
+		I've put zero effort into this one boys
+    ]]
+	function DynamicBul:EffectSurface(src, dir, dist)
+		local bul = {}
+		bul.Num = 1
+		bul.Src = src
+		bul.Dir = dir
+		bul.Spread 	= Vec0
+		bul.Distance = dist
+		bul.Tracer	= 0
+		bul.Force	= 0
+		bul.Damage = 0
+
+		self.owner:FireBullets(bul, true) -- Damage effect on walls n shit.
+	end
+
+	--[[
+		Swish!
+	]]
+	function DynamicBul:NearMissSound()	
+		if not self.swish and (self.owner ~= LocalPlayer() or GetViewEntity() ~= LocalPlayer()) then
 			local pos = EyePos()
 			if GetViewEntity() ~= LocalPlayer() then
 				pos = GetViewEntity():GetPos()
 			end
-			if pos:DistToSqr(self.pos) < 60000 then
-				EmitSound( ricochet[math.random(#ricochet)], self.pos, -1, CHAN_AUTO, 1, 45, 0, 100 )
+			if pos:DistToSqr(self.pos) < 5000 then
+				self.swish = true
+				local tbl = self.Sounds.NearMiss
+				EmitSound( tbl[math.random(#tbl)], self.pos, -1, CHAN_AUTO, 1, 45, 0, 100 )
 			end
 		end
 	end
@@ -350,7 +421,8 @@ function DynamicBullets:DynamicBullets(owner, SWEP, pos, vel)
         Calculates what to damage and where the bullet will be,
         as well as any other forces applied to it.
 
-		Mess with this, and I swear to god, I'll put you into a fucking lua file for eternity
+		Mess with this, and I swear to god, I'll put you into a fucking lua file for eternity.
+		*But in all seriousness, please do as you please, not even I can stop you :)
     ]]
 	local bul, tr = {}, {}
 	function DynamicBul:Calculate(tick)
@@ -373,6 +445,7 @@ function DynamicBullets:DynamicBullets(owner, SWEP, pos, vel)
 
 		self.lasttime = self.curtime
 		self.lastpos = self.pos
+		self.dir = dir
 
         -- We need to trace so that we know if we hit anything, duh
 		local trace = util.TraceLine({
@@ -385,29 +458,7 @@ function DynamicBullets:DynamicBullets(owner, SWEP, pos, vel)
 		local _dist = displace:Length()
 
 		if CLIENT then
-			if not self.swish and (self.owner ~= LocalPlayer() or GetViewEntity() ~= LocalPlayer()) then
-				local pos = EyePos()
-				if GetViewEntity() ~= LocalPlayer() then
-					pos = GetViewEntity():GetPos()
-				end
-				if pos:DistToSqr(self.pos) < 5000 then
-					self.swish = true
-					EmitSound( nearmiss[math.random(#nearmiss)], self.pos, -1, CHAN_AUTO, 1, 45, 0, 100 )
-				end
-			end
-
-			bul.Num = 1
-			bul.Src = self.pos
-			bul.Dir = dir
-			bul.Spread 	= Vec0
-			bul.Distance = _dist
-			bul.Tracer	= 0
-			bul.Force	= 0
-			bul.Damage = 0
-
-			self.owner:FireBullets(bul, true) -- Damage effect on walls n shit.
-
-			bul.Distance = nil
+			self:NearMissSound()
 		end
 
 		self.pos = (self.pos + displace)
@@ -419,24 +470,16 @@ function DynamicBullets:DynamicBullets(owner, SWEP, pos, vel)
 			if trace.HitSky then
 				return true
 			end
+
+			--Effects n stuff, neato
+			self:EffectSurface(self.pos, dir, _dist)
+
             -- Well we hit something, let's fuck it up yea?
 			if trace.Entity && IsValid(trace.Entity) && trace.Entity.TakeDamageInfo then
-				-- Calculate the bullet damage based on the distance travelled
-				local dmg = self:CalculateDamage(self.distancetraveled)
-
-				-- Mimics damage taken from engine bullets
-				local dmginfo = DamageInfo()
-				local magnitude = newvel:Length()
-				dmginfo:SetAttacker( self.owner )
-				dmginfo:SetInflictor( self.inflictor )
-				dmginfo:SetDamage( dmg )
-				dmginfo:SetDamageType( DMG_BULLET )
-				dmginfo:SetDamageForce( dir * (magnitude * (1/dmg)) )
-				dmginfo:SetDamagePosition( trace.HitPos )
-				trace.Entity:TakeDamageInfo( dmginfo )
+				self:DamageEntity(trace)
 			end
 
-            -- check if the surface we hit can be penetrated at an angle.
+            -- Simple penetration and surface ricochet
 			local dot = -dir:DotProduct(trace.HitNormal)
 			if self:CanPenetrate(trace, dot) then
 				local died = self:PenetrateSurface(trace, dot)
@@ -740,14 +783,17 @@ else
 
 	-- Simple renderer for bullets, make things look nice :)
 	local mat = Material('sprites/light_ignorez')
-	local lasermat1 = Material('effects/sw_laser_purple_main')
-	local lasermat2 = Material('effects/sw_laser_purple_front')
 	local enginetick = engine.TickInterval()
 	hook.Add('PreDrawTranslucentRenderables', 'DynamicBullets.Render', function()
 		local entries = DynamicBullets.BulletEntries
 		for k = 1, #entries do
 			local v = entries[k]
-			if v.curtime < enginetick/4 then continue end
+			if v.curtime < enginetick/6 then continue end
+			if v.renderer then
+				v.renderer()
+				return
+			end
+
 			if not v.render.lerpvec then
 				v.render.lerpvec = v.pos
 				v.render.lerplastvec = v.lastpos
@@ -756,12 +802,6 @@ else
 			v.render.lerpvec = LerpVector(FrameTime() * 18, v.render.lerpvec, v.pos)
 			v.render.lerplastvec = LerpVector(FrameTime() * 40, v.render.lerplastvec, v.render.lerpvec)
 			v.render.approachvec = LerpVector(FrameTime() * 5, v.render.approachvec, Vec0)
-
-			--if v.isdead then continue end
-			if v.renderer then
-				v.renderer()
-				return
-			end
 
 			if v.pos ~= v.lastpos then
 				render.DrawLine( v.render.lerplastvec + v.render.approachvec, v.render.lerpvec + v.render.approachvec, Color( 200, 145, 0 ) )
