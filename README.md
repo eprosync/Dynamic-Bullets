@@ -46,8 +46,10 @@ DynamicBullets:FireBullet(self.Owner, self, sp, Dir2, function(bullet)
  bullet:EnableRicochet(self.CanRicochet)
 end)
 ```
- An example of homing bullets with proximity and other factors affecting the bullet
+ An example of homing bullets with proximity and other factors affecting the bullet.
+ 
  This however requires a tick of 24 minimum to work, which is why I added "MultiCalc" as a config.
+ 
  Which allows you to add to the current server tickrate to make things more accurate
  at the cost of performance of course.
 ```
