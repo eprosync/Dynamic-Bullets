@@ -54,4 +54,4 @@ end)
 ## Acknowledgments
 
 * My God Dam Determination to getting this thing to work
-* My GR 11/12 physics teacher for reminding me about these equations
+* My GR 11/12 physics teacher for reminding me about physics so that I can do this
