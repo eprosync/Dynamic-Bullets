@@ -11,13 +11,9 @@
 
 DynamicBullets = {}
 
--- I still don't fully understand converstions from meters to hammer units
--- So please bare with me in this shitty config
-DynamicBullets.Mass = 4 -- grams, supposed to be kilograms but I told physics to fuck off
-
 -- 9.8 m/s^2 is the acceleration of gravity on earth.
--- 9.8 * AnyMass = Force applied, ya know, Fg
-DynamicBullets.Fg = Vector(0, 0, -(DynamicBullets.Mass * 514.43569553806)) -- This is newtons not velocity.
+-- In hammer it's about 514 units/s^2
+DynamicBullets.Fg = Vector(0, 0, -(4 * 514.43569553806)) -- This is acceleration not velocity.
 
 -- Distributes curtime into multiple calculation instances.
 -- This allows more accurate calculations for when hitting objects and etc.
