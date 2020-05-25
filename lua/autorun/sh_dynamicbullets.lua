@@ -6,15 +6,7 @@
 
     When i mean imaginary i mean they aren't actually particles.
     but still interact with the physical world with force.
-
-	100% more optimized that entity bullets
-
 	This is what happens when a developer get's bored
-
-	Some people I wana thank
-		My GR 11/12 physics teacher for reminding me about these equations
-		Majors thanks to gmod for making this way easier than roblox, making it possible for server and client
-			predicted bullets, and making the #1 rule in all networking to not trust the client possible.
 
 	Current bugs,
 		Multi-layered props causes bullets to just not penetrate (This is driving me insane)
