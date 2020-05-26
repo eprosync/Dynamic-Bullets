@@ -26,7 +26,7 @@ DynamicBullets.Fg = Vector(0, 0, -(4 * 514.43569553806)) -- This is acceleration
 DynamicBullets.MultiCalc = 8
 
 -- For debugging bullet travel and velocity
-DynamicBullets.Debug = true
+DynamicBullets.Debug = false
 
 --[[
     Eqn,

@@ -22,7 +22,7 @@ local ricochet = {
 }
 
 local BulletStruct = DynamicBullets.BulletStruct
-local max_renderdistance = 5000*5000
+local max_renderdistance = 15000*15000
 local max_renders = 60
 
 BulletStruct.Sounds = {
