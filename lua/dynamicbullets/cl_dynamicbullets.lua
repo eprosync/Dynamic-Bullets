@@ -1,3 +1,35 @@
+local _math_randomseed = math.randomseed
+local _IsValid = IsValid
+local _render_DrawLine = (CLIENT and render.DrawLine or nil)
+local _net_ReadString = net.ReadString
+local _util_Decompress = util.Decompress
+local _util_JSONToTable = util.JSONToTable
+local _hook_Run = hook.Run
+local _util_TraceLine = util.TraceLine
+local _GetViewEntity = (CLIENT and GetViewEntity or nil)
+local _EyePos = (CLIENT and EyePos or nil)
+local _string_Explode = string.Explode
+local _CurTime = CurTime
+local _Material = Material
+local _hook_Add = hook.Add
+local _LocalPlayer = (CLIENT and LocalPlayer or nil)
+local _net_ReadUInt = net.ReadUInt
+local _LerpVector = LerpVector
+local _FrameTime = FrameTime
+local _table_Copy = table.Copy
+local _math_Round = math.Round
+local _net_Receive = net.Receive
+local _Vector = Vector
+local _EmitSound = EmitSound
+local _render_SetMaterial = (CLIENT and render.SetMaterial or nil)
+local _math_random = math.random
+local _bit_bor = bit.bor
+local _net_ReadEntity = net.ReadEntity
+local _Color = Color
+local _net_ReadData = net.ReadData
+local _net_ReadBool = net.ReadBool
+local _render_DrawSprite = (CLIENT and render.DrawSprite or nil)
+local _table_remove = table.remove
 local nearmiss = {
 	"weapons/fx/nearmiss/bulletltor03.wav",
 	"weapons/fx/nearmiss/bulletltor04.wav",
@@ -36,18 +68,18 @@ BulletStruct.render = { -- simple rendering stuff, make bullets fancy :D
 }
 
 local entries = DynamicBullets.BulletEntries
-local Vec0 = Vector()
+local Vec0 = _Vector()
 
-local trace_normal = bit.bor(CONTENTS_SOLID, CONTENTS_OPAQUE, CONTENTS_MOVEABLE, CONTENTS_DEBRIS, CONTENTS_MONSTER, CONTENTS_HITBOX)
+local trace_normal = _bit_bor(CONTENTS_SOLID, CONTENTS_OPAQUE, CONTENTS_MOVEABLE, CONTENTS_DEBRIS, CONTENTS_MONSTER, CONTENTS_HITBOX)
 
 -- Create functions and information for a specific bullet.
 function DynamicBullets:DynamicBullets(owner, SWEP, pos, vel)
-	local DynamicBul = table.Copy(DynamicBullets.BulletStruct)
+	local DynamicBul = _table_Copy(DynamicBullets.BulletStruct)
 
 	DynamicBul.inflictor = SWEP
 	DynamicBul.weaponclass = SWEP:GetClass()
 	DynamicBul.originpos = pos
-	DynamicBul.inittime = CurTime()
+	DynamicBul.inittime = _CurTime()
 	DynamicBul.pos = pos
 	DynamicBul.lastpos = pos
 	DynamicBul.owner = owner
@@ -135,7 +167,7 @@ function DynamicBullets:DynamicBullets(owner, SWEP, pos, vel)
 		Set to curtime for now till I find a better solution
     ]]
 	function DynamicBul:RandSeed()
-		return math.Round(self.originpos.x + self.originpos.y + self.originpos.z + originvel.x + originvel.y + originvel.z)
+		return _math_Round(self.originpos.x + self.originpos.y + self.originpos.z + originvel.x + originvel.y + originvel.z)
 	end
 
     --[[
@@ -163,7 +195,7 @@ function DynamicBullets:DynamicBullets(owner, SWEP, pos, vel)
 		tr.mask = trace_normal
 		tr.ignoreworld = true
 
-		trace = util.TraceLine(tr)
+		trace = _util_TraceLine(tr)
 
 		--Check the surface if it's actually there
 		--Also check on where the bullet should come out.
@@ -177,7 +209,7 @@ function DynamicBullets:DynamicBullets(owner, SWEP, pos, vel)
 		tr.mask = trace_normal
 		tr.ignoreworld = false
 
-		trace = util.TraceLine(tr)
+		trace = _util_TraceLine(tr)
 		
 		if trace.Hit and trace.HitPos != tr.endpos and trace.HitPos != tr.start then
 			self:EffectSurface(trace.HitPos + dir * 0.01, -dir, 1)
@@ -206,13 +238,13 @@ function DynamicBullets:DynamicBullets(owner, SWEP, pos, vel)
 		Ping!
 	]]
 	function DynamicBul:RicochetSound()	
-		local pos = EyePos()
-		if GetViewEntity() ~= LocalPlayer() then
-			pos = GetViewEntity():GetPos()
+		local pos = _EyePos()
+		if _GetViewEntity() ~= _LocalPlayer() then
+			pos = _GetViewEntity():GetPos()
 		end
 		if pos:DistToSqr(self.pos) < 60000 then
 			local tbl = self.Sounds.Ricochet
-			EmitSound( tbl[math.random(#tbl)], self.pos, -1, CHAN_AUTO, 1, 45, 0, 100 )
+			_EmitSound( tbl[_math_random(#tbl)], self.pos, -1, CHAN_AUTO, 1, 45, 0, 100 )
 		end
 	end
 
@@ -221,13 +253,13 @@ function DynamicBullets:DynamicBullets(owner, SWEP, pos, vel)
     ]]
 	function DynamicBul:RicochetSurface(trace, dot)
 		dir = dir + (trace.HitNormal * dot) * 2
-		local vec = Vector()
-		math.randomseed(self:RandSeed())
-		vec.x = math.random(-1000, 1000) * .001
-		math.randomseed(self:RandSeed()+1)
-		vec.y = math.random(-1000, 1000) * .001
-		math.randomseed(self:RandSeed()+2)
-		vec.z = math.random(-1000, 1000) * .001
+		local vec = _Vector()
+		_math_randomseed(self:RandSeed())
+		vec.x = _math_random(-1000, 1000) * .001
+		_math_randomseed(self:RandSeed()+1)
+		vec.y = _math_random(-1000, 1000) * .001
+		_math_randomseed(self:RandSeed()+2)
+		vec.z = _math_random(-1000, 1000) * .001
 		dir = dir + vec * 0.03
 		local magnitude = self.vel:Length()
 		self.pos = trace.HitPos + dir
@@ -265,15 +297,15 @@ function DynamicBullets:DynamicBullets(owner, SWEP, pos, vel)
 		Swish!
 	]]
 	function DynamicBul:NearMissSound()	
-		if not self.swish and (self.owner ~= LocalPlayer() or GetViewEntity() ~= LocalPlayer()) then
-			local pos = EyePos()
-			if GetViewEntity() ~= LocalPlayer() then
-				pos = GetViewEntity():GetPos()
+		if not self.swish and (self.owner ~= _LocalPlayer() or _GetViewEntity() ~= _LocalPlayer()) then
+			local pos = _EyePos()
+			if _GetViewEntity() ~= _LocalPlayer() then
+				pos = _GetViewEntity():GetPos()
 			end
 			if pos:DistToSqr(self.pos) < 5000 then
 				self.swish = true
 				local tbl = self.Sounds.NearMiss
-				EmitSound( tbl[math.random(#tbl)], self.pos, -1, CHAN_AUTO, 1, 45, 0, 100 )
+				_EmitSound( tbl[_math_random(#tbl)], self.pos, -1, CHAN_AUTO, 1, 45, 0, 100 )
 			end
 		end
 	end
@@ -287,7 +319,7 @@ function DynamicBullets:DynamicBullets(owner, SWEP, pos, vel)
     ]]
 	local bul, tr = {}, {}
 	function DynamicBul:Calculate(tick)
-		if !IsValid(self.owner) then
+		if !_IsValid(self.owner) then
 			return true
 		end
 
@@ -309,7 +341,7 @@ function DynamicBullets:DynamicBullets(owner, SWEP, pos, vel)
 		self.dir = displace:GetNormalized()
 
         -- We need to trace so that we know if we hit anything, duh
-		local trace = util.TraceLine({
+		local trace = _util_TraceLine({
 			start = self.pos,
 			endpos = self.pos + displace,
 			filter = self.owner,
@@ -331,7 +363,7 @@ function DynamicBullets:DynamicBullets(owner, SWEP, pos, vel)
 			self:EffectSurface(self.lastpos, dir, displace:Length())
 
             -- Well we hit something, let's fuck it up yea?
-			if trace.Entity && IsValid(trace.Entity) && trace.Entity.TakeDamageInfo then
+			if trace.Entity && _IsValid(trace.Entity) && trace.Entity.TakeDamageInfo then
 				self:DamageEntity(trace)
 			end
 
@@ -357,7 +389,7 @@ function DynamicBullets:DynamicBullets(owner, SWEP, pos, vel)
 	-- This solves the attributes syncing
 	-- We also only want to send attributes we changed
 	function DynamicBul:ReadAttributes()
-		local attribs = util.JSONToTable(util.Decompress(net.ReadData(net.ReadUInt(16))))
+		local attribs = _util_JSONToTable(_util_Decompress(_net_ReadData(_net_ReadUInt(16))))
 		for k=1, #attribs do
 			local v = attribs[k]
 			self.weaponattributes[v[1]] = v[2]
@@ -380,7 +412,7 @@ function DynamicBullets:FireBullet(owner, SWEP, pos, vel, cb)
 
 	-- Mimic the bullet to come out of the muzzle of the gun for you
 	-- If your muzzle attachment is not 1, I hope you fucking burn in hell
-    if LocalPlayer() == owner and not owner:ShouldDrawLocalPlayer() then
+    if _LocalPlayer() == owner and not owner:ShouldDrawLocalPlayer() then
         local vm = owner:GetViewModel()
         local _pos = pos
         __pos = vm:GetAttachment(1)
@@ -410,31 +442,31 @@ function DynamicBullets:FireBullet(owner, SWEP, pos, vel, cb)
 	-- If you are not lazy, please update the bullet stats through the hook instead of a network based override
 	-- This will use less networking and generally make it easier for the server and client to handle
 	-- Also will allow more access to things like rendering overrides
-	local override = hook.Run('DynamicBullets.Fired', bul) -- You can modify them further from here on out
+	local override = _hook_Run('DynamicBullets.Fired', bul) -- You can modify them further from here on out
 	if not override then
 		-- This is for modifications that did not go through "DynamicBullets.Fired" as an override
 		bul:Sync()
 	end
 
 	-- Store for calculations
-	if owner == LocalPlayer() then
+	if owner == _LocalPlayer() then
 		Local_BulletEntries[#Local_BulletEntries + 1] = bul
 	else
 		entries[#entries + 1] = bul
 	end
 end
 
-net.Receive('DynamicBullets.Fired', function()
-	local owner, SWEP, pos, vel = net.ReadEntity(), net.ReadEntity(), net.ReadString(), net.ReadString()
-	if IsValid(SWEP) and IsValid(owner) then
+_net_Receive('DynamicBullets.Fired', function()
+	local owner, SWEP, pos, vel = _net_ReadEntity(), _net_ReadEntity(), _net_ReadString(), _net_ReadString()
+	if _IsValid(SWEP) and _IsValid(owner) then
 		-- Note for facepunch, net.ReadVector and net.WriteVector are VERY inaccurate
-		pos = string.Explode('|', pos)
-		pos = Vector(pos[1], pos[2], pos[3])
+		pos = _string_Explode('|', pos)
+		pos = _Vector(pos[1], pos[2], pos[3])
 
-		vel = string.Explode('|', vel)
-		vel = Vector(vel[1], vel[2], vel[3])
+		vel = _string_Explode('|', vel)
+		vel = _Vector(vel[1], vel[2], vel[3])
 		DynamicBullets:FireBullet(owner, SWEP, pos, vel, function(bullet)
-			if not net.ReadBool() then
+			if not _net_ReadBool() then
 				bullet:ReadAttributes()
 			end
 		end)
@@ -443,13 +475,13 @@ end)
 
 -- For the engine to use predictions systems with the bullets.
 -- Cause we don't want players raging that their bullets didn't hit
-hook.Add('FinishMove', 'DynamicBullets.CalcPredicted', function(pl, mv)
-    if pl ~= LocalPlayer() then return end
+_hook_Add('FinishMove', 'DynamicBullets.CalcPredicted', function(pl, mv)
+    if pl ~= _LocalPlayer() then return end
     local entries = Local_BulletEntries
 	local entries_len = #entries
 	if entries_len < 1 then return end
 
-    local ct = CurTime()
+    local ct = _CurTime()
     local removals = 0
 
     local calcs, tickseng, ticks = 1, engine.TickInterval(), 1
@@ -467,7 +499,7 @@ hook.Add('FinishMove', 'DynamicBullets.CalcPredicted', function(pl, mv)
         for c=1, calcs do
             local died = v:Calculate(ct - (ticks * calcs) + (c * ticks))
             if died then
-                table.remove(entries, k)
+                _table_remove(entries, k)
                 removals = removals + 1
                 break
             end
@@ -476,7 +508,7 @@ hook.Add('FinishMove', 'DynamicBullets.CalcPredicted', function(pl, mv)
                 DynamicBullets.DebugTable[#DynamicBullets.DebugTable + 1] = {
                     ["start"] = v.lastpos,
                     ["end"] = v.pos,
-                    ["color"] = Color(255,255,255),
+                    ["color"] = _Color(255,255,255),
                     ["time"] = (ct - (ticks * calcs) + (c * ticks)) + 4
                 }
             end
@@ -487,8 +519,8 @@ end)
 
 -- For other players, this does not require predictions since the server is sending this to us
 -- I hate myself for mimicing predicted curtime in here.
-hook.Add('Tick', 'DynamicBullets.Calc', function()
-    local LP = LocalPlayer()
+_hook_Add('Tick', 'DynamicBullets.Calc', function()
+    local LP = _LocalPlayer()
     local entries = DynamicBullets.BulletEntries
     local removals = 0
 
@@ -512,7 +544,7 @@ hook.Add('Tick', 'DynamicBullets.Calc', function()
         for c=1, calcs do
             local died = v:Calculate(ct - (ticks * calcs) + (c * ticks))
             if died then
-                table.remove(entries, k)
+                _table_remove(entries, k)
                 removals = removals + 1
                 break
             end
@@ -520,7 +552,7 @@ hook.Add('Tick', 'DynamicBullets.Calc', function()
                 DynamicBullets.DebugTable[#DynamicBullets.DebugTable + 1] = {
                     ["start"] = v.lastpos,
                     ["end"] = v.pos,
-                    ["color"] = Color(255,0,0),
+                    ["color"] = _Color(255,0,0),
                     ["time"] = (ct - (ticks * calcs) + (c * ticks)) + 4
                 }
             end
@@ -529,14 +561,14 @@ hook.Add('Tick', 'DynamicBullets.Calc', function()
 end)
 
 -- Simple renderer for bullets, make things look nice :)
-local mat = Material('sprites/light_ignorez')
+local mat = _Material('sprites/light_ignorez')
 local enginetick = engine.TickInterval()
-hook.Add('PreDrawTranslucentRenderables', 'DynamicBullets.Render', function()
+_hook_Add('PreDrawTranslucentRenderables', 'DynamicBullets.Render', function()
     local entries = DynamicBullets.BulletEntries
     for k = 1, #entries do
         local v = entries[k]
         if v.curtime < enginetick/6 then continue end
-		if k > max_renders or v.pos:DistToSqr(EyePos()) > max_renderdistance then continue end
+		if k > max_renders or v.pos:DistToSqr(_EyePos()) > max_renderdistance then continue end
         if v.renderer then
             v.renderer()
             return
@@ -547,21 +579,21 @@ hook.Add('PreDrawTranslucentRenderables', 'DynamicBullets.Render', function()
             v.render.lerplastvec = v.lastpos
             v.render.approachvec = Vec0
         end
-        v.render.lerpvec = LerpVector(FrameTime() * 18, v.render.lerpvec, v.pos)
-        v.render.lerplastvec = LerpVector(FrameTime() * 40, v.render.lerplastvec, v.render.lerpvec)
-        v.render.approachvec = LerpVector(FrameTime() * 5, v.render.approachvec, Vec0)
+        v.render.lerpvec = _LerpVector(_FrameTime() * 18, v.render.lerpvec, v.pos)
+        v.render.lerplastvec = _LerpVector(_FrameTime() * 40, v.render.lerplastvec, v.render.lerpvec)
+        v.render.approachvec = _LerpVector(_FrameTime() * 5, v.render.approachvec, Vec0)
 
         if v.pos ~= v.lastpos then
-            render.DrawLine( v.render.lerplastvec + v.render.approachvec, v.render.lerpvec + v.render.approachvec, Color( 200, 145, 0 ) )
-            render.SetMaterial(mat)
-            render.DrawSprite( v.render.lerpvec + v.render.approachvec, 25, 25, Color( 200, 145, 0 ) )
+            _render_DrawLine( v.render.lerplastvec + v.render.approachvec, v.render.lerpvec + v.render.approachvec, _Color( 200, 145, 0 ) )
+            _render_SetMaterial(mat)
+            _render_DrawSprite( v.render.lerpvec + v.render.approachvec, 25, 25, _Color( 200, 145, 0 ) )
         end
     end
 
     for k = 1, #Local_BulletEntries do
         local v = Local_BulletEntries[k]
         if v.curtime < enginetick/6 then continue end
-		if k > max_renders or v.pos:DistToSqr(EyePos()) > max_renderdistance then continue end
+		if k > max_renders or v.pos:DistToSqr(_EyePos()) > max_renderdistance then continue end
         if v.renderer then
             v.renderer()
             return
@@ -572,30 +604,30 @@ hook.Add('PreDrawTranslucentRenderables', 'DynamicBullets.Render', function()
             v.render.lerplastvec = v.lastpos
             v.render.approachvec = Vec0
         end
-        v.render.lerpvec = LerpVector(FrameTime() * 18, v.render.lerpvec, v.pos)
-        v.render.lerplastvec = LerpVector(FrameTime() * 40, v.render.lerplastvec, v.render.lerpvec)
-        v.render.approachvec = LerpVector(FrameTime() * 5, v.render.approachvec, Vec0)
+        v.render.lerpvec = _LerpVector(_FrameTime() * 18, v.render.lerpvec, v.pos)
+        v.render.lerplastvec = _LerpVector(_FrameTime() * 40, v.render.lerplastvec, v.render.lerpvec)
+        v.render.approachvec = _LerpVector(_FrameTime() * 5, v.render.approachvec, Vec0)
 
         if v.pos ~= v.lastpos then
-            render.DrawLine( v.render.lerplastvec + v.render.approachvec, v.render.lerpvec + v.render.approachvec, Color( 200, 145, 0 ) )
-            render.SetMaterial(mat)
-            render.DrawSprite( v.render.lerpvec + v.render.approachvec, 25, 25, Color( 200, 145, 0 ) )
+            _render_DrawLine( v.render.lerplastvec + v.render.approachvec, v.render.lerpvec + v.render.approachvec, _Color( 200, 145, 0 ) )
+            _render_SetMaterial(mat)
+            _render_DrawSprite( v.render.lerpvec + v.render.approachvec, 25, 25, _Color( 200, 145, 0 ) )
         end
     end
 end)
 
 -- Simply debugger for bullet trajectories
-hook.Add( "PostDrawOpaqueRenderables", "DynamicBullets.Debug", function()
+_hook_Add( "PostDrawOpaqueRenderables", "DynamicBullets.Debug", function()
     if not DynamicBullets.Debug then return end
     local debugtable = DynamicBullets.DebugTable
     local removes = 0
     for k=1, #debugtable do
         k = k - removes
         local v = debugtable[k]
-        render.DrawLine( v["start"], v["end"], (v["color"] and v["color"] or Color(255,255,255)) )
-        if v["time"]  < CurTime() then
+        _render_DrawLine( v["start"], v["end"], (v["color"] and v["color"] or _Color(255,255,255)) )
+        if v["time"]  < _CurTime() then
             removes = removes + 1
-            table.remove(debugtable, k)
+            _table_remove(debugtable, k)
         end
     end
 end)

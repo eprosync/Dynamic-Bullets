@@ -1,14 +1,40 @@
+local _hook_Run = hook.Run
+local _util_TableToJSON = util.TableToJSON
+local _math_randomseed = math.randomseed
+local _bit_bor = bit.bor
+local _net_Broadcast = (SERVER and net.Broadcast or nil)
+local _util_TraceLine = util.TraceLine
+local _net_WriteUInt = net.WriteUInt
+local _net_WriteData = net.WriteData
+local _net_WriteEntity = net.WriteEntity
+local _net_Start = net.Start
+local _util_AddNetworkString = (SERVER and util.AddNetworkString or nil)
+local _CurTime = CurTime
+local _net_WriteString = net.WriteString
+local _pairs = pairs
+local _IsValid = IsValid
+local _util_Compress = util.Compress
+local _hook_Add = hook.Add
+local _table_Copy = table.Copy
+local _math_Round = math.Round
+local _Vector = Vector
+local _net_SendOmit = (SERVER and net.SendOmit or nil)
+local _math_random = math.random
+local _DamageInfo = DamageInfo
+local _math_sqrt = math.sqrt
+local _net_WriteBool = net.WriteBool
+local _table_remove = table.remove
 local entries = DynamicBullets.BulletEntries
-local Vec0 = Vector()
+local Vec0 = _Vector()
 
-util.AddNetworkString('DynamicBullets.Fired')
+_util_AddNetworkString('DynamicBullets.Fired')
 
-local trace_normal = bit.bor(CONTENTS_SOLID, CONTENTS_OPAQUE, CONTENTS_MOVEABLE, CONTENTS_DEBRIS, CONTENTS_MONSTER, CONTENTS_HITBOX)
+local trace_normal = _bit_bor(CONTENTS_SOLID, CONTENTS_OPAQUE, CONTENTS_MOVEABLE, CONTENTS_DEBRIS, CONTENTS_MONSTER, CONTENTS_HITBOX)
 
 local BulletStruct = DynamicBullets.BulletStruct
 BulletStruct.distancetraveledsqr = 0
 
-local BulletAttributes = table.Copy(BulletStruct.weaponattributes)
+local BulletAttributes = _table_Copy(BulletStruct.weaponattributes)
 
 BulletStruct.weaponattributes.dmgmax = 1
 BulletStruct.weaponattributes.dmgmin = 0
@@ -19,12 +45,12 @@ BulletStruct.weaponattributes.force = 1
 
 -- Create functions and information for a specific bullet.
 function DynamicBullets:DynamicBullets(owner, SWEP, pos, vel)
-	local DynamicBul = table.Copy(DynamicBullets.BulletStruct)
+	local DynamicBul = _table_Copy(DynamicBullets.BulletStruct)
 
 	DynamicBul.inflictor = SWEP
 	DynamicBul.weaponclass = SWEP:GetClass()
 	DynamicBul.originpos = pos
-	DynamicBul.inittime = CurTime()
+	DynamicBul.inittime = _CurTime()
 	DynamicBul.pos = pos
 	DynamicBul.lastpos = pos
 	DynamicBul.owner = owner
@@ -123,7 +149,7 @@ function DynamicBullets:DynamicBullets(owner, SWEP, pos, vel)
 		Set to curtime for now till I find a better solution
     ]]
 	function DynamicBul:RandSeed()
-		return math.Round(self.originpos.x + self.originpos.y + self.originpos.z + originvel.x + originvel.y + originvel.z)
+		return _math_Round(self.originpos.x + self.originpos.y + self.originpos.z + originvel.x + originvel.y + originvel.z)
 	end
 
     --[[
@@ -151,7 +177,7 @@ function DynamicBullets:DynamicBullets(owner, SWEP, pos, vel)
 		tr.mask = trace_normal
 		tr.ignoreworld = true
 
-		trace = util.TraceLine(tr)
+		trace = _util_TraceLine(tr)
 
 		--Check the surface if it's actually there
 		--Also check on where the bullet should come out.
@@ -165,7 +191,7 @@ function DynamicBullets:DynamicBullets(owner, SWEP, pos, vel)
 		tr.mask = trace_normal
 		tr.ignoreworld = false
 
-		trace = util.TraceLine(tr)
+		trace = _util_TraceLine(tr)
 		
 		if trace.Hit and trace.HitPos != tr.endpos and trace.HitPos != tr.start then
 			-- Set position to out point, calculate our new velocity based on the distance we penetrated through
@@ -196,13 +222,13 @@ function DynamicBullets:DynamicBullets(owner, SWEP, pos, vel)
 	function DynamicBul:RicochetSurface(trace, dot)
 		local weaponattributes = self.weaponattributes
 		dir = dir + (trace.HitNormal * dot) * 2
-		local vec = Vector()
-		math.randomseed(self:RandSeed())
-		vec.x = math.random(-1000, 1000) * .001
-		math.randomseed(self:RandSeed()+1)
-		vec.y = math.random(-1000, 1000) * .001
-		math.randomseed(self:RandSeed()+2)
-		vec.z = math.random(-1000, 1000) * .001
+		local vec = _Vector()
+		_math_randomseed(self:RandSeed())
+		vec.x = _math_random(-1000, 1000) * .001
+		_math_randomseed(self:RandSeed()+1)
+		vec.y = _math_random(-1000, 1000) * .001
+		_math_randomseed(self:RandSeed()+2)
+		vec.z = _math_random(-1000, 1000) * .001
 		dir = dir + vec * 0.03
 		local magnitude = self.vel:Length()
 		self.pos = trace.HitPos + dir
@@ -218,10 +244,10 @@ function DynamicBullets:DynamicBullets(owner, SWEP, pos, vel)
     ]]
 	function DynamicBul:DamageEntity(trace)
 		-- Calculate the bullet damage based on the distance travelled
-		local dmg = self:CalculateDamage(math.sqrt(self.distancetraveledsqr))
+		local dmg = self:CalculateDamage(_math_sqrt(self.distancetraveledsqr))
 
 		-- Mimics damage taken from engine bullets
-		local dmginfo = DamageInfo()
+		local dmginfo = _DamageInfo()
 		local magnitude = self.vel:Length()
 		dmginfo:SetAttacker( self.owner )
 		dmginfo:SetInflictor( self.inflictor )
@@ -231,10 +257,10 @@ function DynamicBullets:DynamicBullets(owner, SWEP, pos, vel)
 		dmginfo:SetDamagePosition( trace.HitPos )
 
 		if trace.Entity:IsPlayer() then
-			hook.Run( "ScalePlayerDamage", trace.Entity, trace.HitGroup, dmginfo)
+			_hook_Run( "ScalePlayerDamage", trace.Entity, trace.HitGroup, dmginfo)
 			if GAMEMODE.ScalePlayerDamage then GAMEMODE:ScalePlayerDamage(trace.Entity, trace.HitGroup, dmginfo) end
 		elseif trace.Entity:IsNPC() then
-			hook.Run( "ScaleNPCDamage", trace.Entity, trace.HitGroup, dmginfo)
+			_hook_Run( "ScaleNPCDamage", trace.Entity, trace.HitGroup, dmginfo)
 			if GAMEMODE.ScaleNPCDamage then GAMEMODE:ScaleNPCDamage(trace.Entity, trace.HitGroup, dmginfo) end
 		end
 
@@ -250,7 +276,7 @@ function DynamicBullets:DynamicBullets(owner, SWEP, pos, vel)
     ]]
 	local bul, tr = {}, {}
 	function DynamicBul:Calculate(tick)
-		if !IsValid(self.owner) then
+		if !_IsValid(self.owner) then
 			return true
 		end
 
@@ -272,7 +298,7 @@ function DynamicBullets:DynamicBullets(owner, SWEP, pos, vel)
 		self.dir = displace:GetNormalized()
 
         -- We need to trace so that we know if we hit anything, duh
-		local trace = util.TraceLine({
+		local trace = _util_TraceLine({
 			start = self.pos,
 			endpos = self.pos + displace,
 			filter = self.owner,
@@ -292,7 +318,7 @@ function DynamicBullets:DynamicBullets(owner, SWEP, pos, vel)
 			end
 
             -- Well we hit something, let's fuck it up yea?
-			if trace.Entity && IsValid(trace.Entity) && trace.Entity.TakeDamageInfo then
+			if trace.Entity && _IsValid(trace.Entity) && trace.Entity.TakeDamageInfo then
 				self:DamageEntity(trace)
 			end
 
@@ -319,36 +345,36 @@ function DynamicBullets:DynamicBullets(owner, SWEP, pos, vel)
 	-- We also only want to send attributes we changed
 	function DynamicBul:WriteAttributes()
 		local attribs = {}
-		for k, v in pairs(BulletAttributes) do
+		for k, v in _pairs(BulletAttributes) do
 			if self.weaponattributes[k] ~= v then
 				attribs[#attribs+1] = {k, self.weaponattributes[k]}
 			end
 		end
 		if #attribs < 1 then return false end
-		attribs = util.Compress(util.TableToJSON(attribs))
+		attribs = _util_Compress(_util_TableToJSON(attribs))
 		local len = #attribs
-		net.WriteUInt(len, 16)
-		net.WriteData(attribs, len)
+		_net_WriteUInt(len, 16)
+		_net_WriteData(attribs, len)
 		return true
 	end
 
 	-- This is because when you fire, firebullet does not get called for anyone else.
 	function DynamicBul:Sync(override)
-        net.Start('DynamicBullets.Fired', true)
-        net.WriteEntity(self.owner)
-        net.WriteEntity(self.inflictor)
-        net.WriteString(pos.x .. '|' .. pos.y .. '|' .. pos.z)
-        net.WriteString(vel.x .. '|' .. vel.y .. '|' .. vel.z)
+        _net_Start('DynamicBullets.Fired', true)
+        _net_WriteEntity(self.owner)
+        _net_WriteEntity(self.inflictor)
+        _net_WriteString(pos.x .. '|' .. pos.y .. '|' .. pos.z)
+        _net_WriteString(vel.x .. '|' .. vel.y .. '|' .. vel.z)
         if not override then
             if self:WriteAttributes() == false then
                 override = true
             end
         end
-        net.WriteBool(override)
+        _net_WriteBool(override)
         if self.owner:IsPlayer() then
-            net.SendOmit(owner)
+            _net_SendOmit(owner)
         else
-            net.Broadcast()
+            _net_Broadcast()
         end
 	end
 	
@@ -365,7 +391,7 @@ function DynamicBullets:FireBullet(owner, SWEP, pos, vel, cb)
 	-- If you are not lazy, please update the bullet stats through the hook instead of a network based override
 	-- This will use less networking and generally make it easier for the server and client to handle
 	-- Also will allow more access to things like rendering overrides
-	local override = hook.Run('DynamicBullets.Fired', bul) -- You can modify them further from here on out
+	local override = _hook_Run('DynamicBullets.Fired', bul) -- You can modify them further from here on out
 	if not override then
 		-- This is for modifications that did not go through "DynamicBullets.Fired" as an override
 		bul:Sync()
@@ -387,13 +413,13 @@ end
 -- We CANNOT trust the client for any of this.
 -- Or else we end up with a game like Phantom Forces from roblox
 -- Which by the ways, has wayyyy too many cheaters
-hook.Add('FinishMove', 'DynamicBullets.Calc', function(pl, mv)
+_hook_Add('FinishMove', 'DynamicBullets.Calc', function(pl, mv)
     local entries = pl.dbulletentires
 	if not entries then return end
 	local entires_len = #entries
 	if entires_len < 1 then return end
 
-    local ct = CurTime()
+    local ct = _CurTime()
     local calcs, ticks = 1, engine.TickInterval()
     if DynamicBullets.MultiCalc then
         calcs = DynamicBullets.MultiCalc
@@ -409,7 +435,7 @@ hook.Add('FinishMove', 'DynamicBullets.Calc', function(pl, mv)
         for c=1, calcs do
             local died = v:Calculate(ct - (ticks * calcs) + (c * ticks))
             if died then
-                table.remove(entries, k)
+                _table_remove(entries, k)
                 removals = removals + 1
                 break
             end
@@ -419,9 +445,9 @@ hook.Add('FinishMove', 'DynamicBullets.Calc', function(pl, mv)
 end)
 
 -- Non players do not need prediction, ever...
-hook.Add('Tick', 'DynamicBullets.Calc', function()
+_hook_Add('Tick', 'DynamicBullets.Calc', function()
     local entries = DynamicBullets.BulletEntries
-    local ct = CurTime()
+    local ct = _CurTime()
     local calcs, ticks = 1, engine.TickInterval()
     if DynamicBullets.MultiCalc then
         calcs = DynamicBullets.MultiCalc
@@ -436,7 +462,7 @@ hook.Add('Tick', 'DynamicBullets.Calc', function()
         for c=1, calcs do
             local died = v:Calculate(ct - (ticks * calcs) + (c * ticks))
             if died then
-                table.remove(entries, k)
+                _table_remove(entries, k)
                 removals = removals + 1
                 break
             end

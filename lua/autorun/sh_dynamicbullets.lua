@@ -1,3 +1,7 @@
+local _Vector = Vector
+local _print = print
+local _AddCSLuaFile = AddCSLuaFile
+local _include = include
 --[[
 	Dynamic bullets - Created by WholeCream
 
@@ -18,7 +22,7 @@ DynamicBullets = DynamicBullets or {}
 
 -- 9.8 m/s^2 is the acceleration of gravity on earth.
 -- In hammer it's about 514 units/s^2
-DynamicBullets.Fg = Vector(0, 0, -(4 * 514.43569553806)) -- This is acceleration not velocity.
+DynamicBullets.Fg = _Vector(0, 0, -(4 * 514.43569553806)) -- This is acceleration not velocity.
 
 -- Distributes curtime into multiple calculation instances.
 -- This allows more accurate calculations for when hitting objects and etc.
@@ -48,7 +52,7 @@ DynamicBullets.Debug = false
 --]]
 
 local function Fprint(s)
-	print('[Dynamic Bullets] -> ' .. s)
+	_print('[Dynamic Bullets] -> ' .. s)
 end
 
 -- Stuff from the original weapon base of CW 2.0, Sleek Weapon Base
@@ -107,11 +111,11 @@ DynamicBullets.BulletStruct = BulletStruct
 DynamicBullets.BulletEntries = {} -- Contains all fired bullets
 
 if CLIENT then
-	include('dynamicbullets/cl_dynamicbullets.lua')
+	_include('dynamicbullets/cl_dynamicbullets.lua')
 else
-	AddCSLuaFile('dynamicbullets/cl_dynamicbullets.lua')
-	include('dynamicbullets/sv_dynamicbullets.lua')
+	_AddCSLuaFile('dynamicbullets/cl_dynamicbullets.lua')
+	_include('dynamicbullets/sv_dynamicbullets.lua')
 end
 
-print('Dynamic Bullets 1.0 - Created by WholeCream')
+_print('Dynamic Bullets 1.0 - Created by WholeCream')
 Fprint('More dynamic than those "Physical Bullets" on the workshop :)')
