@@ -52,6 +52,7 @@ function DynamicBullets:DynamicBullets(owner, SWEP, pos, vel)
 	DynamicBul.lastpos = pos
 	DynamicBul.owner = owner
 	DynamicBul.vel = vel * 40000
+	local originvel = vel * 40000
 	local dir = vel:GetNormalized()
 
 	-- Methods
@@ -134,7 +135,7 @@ function DynamicBullets:DynamicBullets(owner, SWEP, pos, vel)
 		Set to curtime for now till I find a better solution
     ]]
 	function DynamicBul:RandSeed()
-		return math.Round(CurTime())
+		return math.Round(self.originpos.x + self.originpos.y + self.originpos.z + originvel.x + originvel.y + originvel.z)
 	end
 
     --[[
@@ -221,6 +222,7 @@ function DynamicBullets:DynamicBullets(owner, SWEP, pos, vel)
 	function DynamicBul:RicochetSurface(trace, dot)
 		dir = dir + (trace.HitNormal * dot) * 2
 		local vec = Vector()
+		print(self:RandSeed())
 		math.randomseed(self:RandSeed())
 		vec.x = math.random(-1000, 1000) * .001
 		math.randomseed(self:RandSeed()+1)
