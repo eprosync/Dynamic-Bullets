@@ -389,6 +389,9 @@ end
 hook.Add('FinishMove', 'DynamicBullets.Calc', function(pl, mv)
     local entries = pl.dbulletentires
 	if not entries then return end
+	local entires_len = #entries
+	if entires_len < 1 then return end
+	
     local ct = CurTime()
     local calcs, ticks = 1, engine.TickInterval()
     if DynamicBullets.MultiCalc then

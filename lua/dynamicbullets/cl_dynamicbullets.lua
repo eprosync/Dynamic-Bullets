@@ -444,8 +444,11 @@ end)
 -- Cause we don't want players raging that their bullets didn't hit
 hook.Add('FinishMove', 'DynamicBullets.CalcPredicted', function(pl, mv)
     if pl ~= LocalPlayer() then return end
-    local ct = CurTime()
     local entries = Local_BulletEntries
+	local entries_len = #entries
+	if entries_len < 1 then return end
+
+    local ct = CurTime()
     local removals = 0
 
     local calcs, tickseng, ticks = 1, engine.TickInterval(), 1
@@ -454,7 +457,7 @@ hook.Add('FinishMove', 'DynamicBullets.CalcPredicted', function(pl, mv)
         ticks = tickseng
         ticks = ticks / calcs
     end
-
+	
 	pl:LagCompensation(true)
     for k = 1, #entries do
         k = k - removals
@@ -531,6 +534,31 @@ hook.Add('PreDrawTranslucentRenderables', 'DynamicBullets.Render', function()
     local entries = DynamicBullets.BulletEntries
     for k = 1, #entries do
         local v = entries[k]
+        if v.curtime < enginetick/6 then continue end
+		if k > max_renders or v.pos:DistToSqr(EyePos()) > max_renderdistance then continue end
+        if v.renderer then
+            v.renderer()
+            return
+        end
+
+        if not v.render.lerpvec then
+            v.render.lerpvec = v.pos
+            v.render.lerplastvec = v.lastpos
+            v.render.approachvec = Vec0
+        end
+        v.render.lerpvec = LerpVector(FrameTime() * 18, v.render.lerpvec, v.pos)
+        v.render.lerplastvec = LerpVector(FrameTime() * 40, v.render.lerplastvec, v.render.lerpvec)
+        v.render.approachvec = LerpVector(FrameTime() * 5, v.render.approachvec, Vec0)
+
+        if v.pos ~= v.lastpos then
+            render.DrawLine( v.render.lerplastvec + v.render.approachvec, v.render.lerpvec + v.render.approachvec, Color( 200, 145, 0 ) )
+            render.SetMaterial(mat)
+            render.DrawSprite( v.render.lerpvec + v.render.approachvec, 25, 25, Color( 200, 145, 0 ) )
+        end
+    end
+
+    for k = 1, #Local_BulletEntries do
+        local v = Local_BulletEntries[k]
         if v.curtime < enginetick/6 then continue end
 		if k > max_renders or v.pos:DistToSqr(EyePos()) > max_renderdistance then continue end
         if v.renderer then
