@@ -222,7 +222,6 @@ function DynamicBullets:DynamicBullets(owner, SWEP, pos, vel)
 	function DynamicBul:RicochetSurface(trace, dot)
 		dir = dir + (trace.HitNormal * dot) * 2
 		local vec = Vector()
-		print(self:RandSeed())
 		math.randomseed(self:RandSeed())
 		vec.x = math.random(-1000, 1000) * .001
 		math.randomseed(self:RandSeed()+1)
