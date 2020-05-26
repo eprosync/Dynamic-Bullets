@@ -302,9 +302,6 @@ function DynamicBullets:DynamicBullets(owner, SWEP, pos, vel)
 		if self.curtime >= self.life then
 			return true
 		end
-		if self.weaponattributes.dmgmul < 0.01 then
-			return true
-		end -- decimals do nothing lmao (or are at a point where damage is debatable.)
 		return false
 	end
 

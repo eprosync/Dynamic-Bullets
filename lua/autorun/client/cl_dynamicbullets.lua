@@ -188,8 +188,6 @@ function DynamicBullets:DynamicBullets(owner, SWEP, pos, vel)
 			self.pos = trace.HitPos
 
 			local penDist = (penlen - trace.HitPos:Distance(hit_pos))
-			weaponattributes.force = weaponattributes.force * (penDist / penlen) * 0.75
-			weaponattributes.dmgmul = weaponattributes.dmgmul * (penDist / penlen) * 0.75
 			self.vel = self.vel * (penDist / penlen) * 0.85
 
 			self.LayersPenetrated = self.LayersPenetrated + 1
@@ -224,7 +222,6 @@ function DynamicBullets:DynamicBullets(owner, SWEP, pos, vel)
         Ricochet the surface
     ]]
 	function DynamicBul:RicochetSurface(trace, dot)
-		local weaponattributes = self.weaponattributes
 		dir = dir + (trace.HitNormal * dot) * 2
 		local vec = Vector()
 		math.randomseed(self:RandSeed())
@@ -236,8 +233,6 @@ function DynamicBullets:DynamicBullets(owner, SWEP, pos, vel)
 		dir = dir + vec * 0.03
 		local magnitude = self.vel:Length()
 		self.pos = trace.HitPos + dir
-		weaponattributes.force = weaponattributes.force * 0.225
-		weaponattributes.dmgmul = weaponattributes.dmgmul * 0.75
 		self.vel = (dir * magnitude) * 0.75
 		self:RicochetSound()
 	end
@@ -355,9 +350,6 @@ function DynamicBullets:DynamicBullets(owner, SWEP, pos, vel)
 		if self.curtime >= self.life then
 			return true
 		end
-		if self.weaponattributes.dmgmul < 0.01 then
-			return true
-		end -- decimals do nothing lmao (or are at a point where damage is debatable.)
 		return false
 	end
 
