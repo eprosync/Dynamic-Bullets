@@ -106,5 +106,12 @@ DynamicBullets.BulletStruct = BulletStruct
 -- Contains bullets that still need calculations until their life ends.
 DynamicBullets.BulletEntries = {} -- Contains all fired bullets
 
+if CLIENT then
+	include('dynamicbullets/cl_dynamicbullets.lua')
+else
+	AddCSLuaFile('dynamicbullets/cl_dynamicbullets.lua')
+	include('dynamicbullets/sv_dynamicbullets.lua')
+end
+
 print('Dynamic Bullets 1.0 - Created by WholeCream')
 Fprint('More dynamic than those "Physical Bullets" on the workshop :)')
