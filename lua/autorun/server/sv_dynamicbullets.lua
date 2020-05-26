@@ -5,6 +5,18 @@ util.AddNetworkString('DynamicBullets.Fired')
 
 local trace_normal = bit.bor(CONTENTS_SOLID, CONTENTS_OPAQUE, CONTENTS_MOVEABLE, CONTENTS_DEBRIS, CONTENTS_MONSTER, CONTENTS_HITBOX)
 
+local BulletStruct = DynamicBullets.BulletStruct
+BulletStruct.distancetraveledsqr = 0
+
+local BulletAttributes = table.Copy(BulletStruct.weaponattributes)
+
+BulletStruct.weaponattributes.dmgmax = 1
+BulletStruct.weaponattributes.dmgmin = 0
+BulletStruct.weaponattributes.rangemax = 1
+BulletStruct.weaponattributes.rangemin = 0
+BulletStruct.weaponattributes.dmgmul = 1
+BulletStruct.weaponattributes.force = 1
+
 -- Create functions and information for a specific bullet.
 function DynamicBullets:DynamicBullets(owner, SWEP, pos, vel)
 	local DynamicBul = table.Copy(DynamicBullets.BulletStruct)
@@ -208,7 +220,7 @@ function DynamicBullets:DynamicBullets(owner, SWEP, pos, vel)
     ]]
 	function DynamicBul:DamageEntity(trace)
 		-- Calculate the bullet damage based on the distance travelled
-		local dmg = self:CalculateDamage(self.distancetraveled)
+		local dmg = self:CalculateDamage(math.sqrt(self.distancetraveledsqr))
 
 		-- Mimics damage taken from engine bullets
 		local dmginfo = DamageInfo()
@@ -260,11 +272,11 @@ function DynamicBullets:DynamicBullets(owner, SWEP, pos, vel)
 			mask = MASK_SHOT
 		})
 
-		local _dist = displace:Length()
+		local _dist = displace:LengthSqr()
 
 		self.pos = (self.pos + displace)
 		self.vel = newvel
-		self.distancetraveled = self.distancetraveled + _dist
+		self.distancetraveledsqr = self.distancetraveledsqr + _dist
 
         -- In theory all this penetration calculations i made should work aswell.
 		if trace.Hit and trace.HitPos ~= self.lastpos then
@@ -303,7 +315,7 @@ function DynamicBullets:DynamicBullets(owner, SWEP, pos, vel)
 	-- We also only want to send attributes we changed
 	function DynamicBul:WriteAttributes()
 		local attribs = {}
-		for k, v in pairs(BulletStruct.weaponattributes) do
+		for k, v in pairs(BulletAttributes) do
 			if self.weaponattributes[k] ~= v then
 				attribs[#attribs+1] = {k, self.weaponattributes[k]}
 			end

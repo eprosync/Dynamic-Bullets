@@ -23,7 +23,7 @@ DynamicBullets.Fg = Vector(0, 0, -(4 * 514.43569553806)) -- This is acceleration
 -- Distributes curtime into multiple calculation instances.
 -- This allows more accurate calculations for when hitting objects and etc.
 -- I suggest doing this when at a low tick like 33 - 11 as this will increase the need for more resources
-DynamicBullets.MultiCalc = 17
+DynamicBullets.MultiCalc = 8
 
 -- For debugging bullet travel and velocity
 DynamicBullets.Debug = true
@@ -87,18 +87,10 @@ local BulletStruct = DynamicBullets.BulletStruct or {}
 BulletStruct.time = 0
 BulletStruct.lasttime = 0
 BulletStruct.curtime = 0
-BulletStruct.distancetraveled = 0
 BulletStruct.life = 1.5
 BulletStruct.LayersPenetrated = 0 -- If we need to limit out penetrations which we should.
 
 BulletStruct.weaponattributes = {
-	dmgmax = 1,
-	dmgmin = 0,
-	rangemax = 1,
-	rangemin = 0,
-	dmgmul = 1,
-	force = 1,
-
 	CanPenetrate = false,
 	PenetrationRange = 0,
 	PenetrationStrength = 0,

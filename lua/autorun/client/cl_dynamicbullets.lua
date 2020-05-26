@@ -23,6 +23,7 @@ local ricochet = {
 
 local BulletStruct = DynamicBullets.BulletStruct
 local max_renderdistance = 5000*5000
+local max_renders = 60
 
 BulletStruct.Sounds = {
 	NearMiss = nearmiss,
@@ -97,16 +98,12 @@ function DynamicBullets:DynamicBullets(owner, SWEP, pos, vel)
         Set the damage of the bullet
     ]]
 	function DynamicBul:SetDamage(Min, Max)
-		self.weaponattributes.dmgmax = Max
-		self.weaponattributes.dmgmin = Min
 	end
 
     --[[
         Set the damage range of the bullet
     ]]
 	function DynamicBul:SetRange(Min, Max)
-		self.weaponattributes.rangemax = Max
-		self.weaponattributes.rangemin = Min
 	end
 
 	-- Dangerous stuff, you probably don't want to touch this
@@ -326,13 +323,10 @@ function DynamicBullets:DynamicBullets(owner, SWEP, pos, vel)
 			mask = MASK_SHOT
 		})
 
-		local _dist = displace:Length()
-
 		self:NearMissSound()
 
 		self.pos = (self.pos + displace)
 		self.vel = newvel
-		self.distancetraveled = self.distancetraveled + _dist
 
         -- In theory all this penetration calculations i made should work aswell.
 		if trace.Hit and trace.HitPos ~= self.lastpos then
@@ -341,7 +335,7 @@ function DynamicBullets:DynamicBullets(owner, SWEP, pos, vel)
 			end
 
 			--Effects n stuff, neato
-			self:EffectSurface(self.lastpos, dir, _dist)
+			self:EffectSurface(self.lastpos, dir, displace:Length())
 
             -- Well we hit something, let's fuck it up yea?
 			if trace.Entity && IsValid(trace.Entity) && trace.Entity.TakeDamageInfo then
@@ -543,7 +537,7 @@ hook.Add('PreDrawTranslucentRenderables', 'DynamicBullets.Render', function()
     for k = 1, #entries do
         local v = entries[k]
         if v.curtime < enginetick/6 then continue end
-		if v.pos:DistToSqr(EyePos()) > max_renderdistance then continue end
+		if k > max_renders or v.pos:DistToSqr(EyePos()) > max_renderdistance then continue end
         if v.renderer then
             v.renderer()
             return
