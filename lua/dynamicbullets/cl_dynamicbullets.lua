@@ -371,6 +371,8 @@ function DynamicBullets:DynamicBullets(owner, SWEP, pos, vel)
 end
 
 
+local Local_BulletEntries = {}
+
 function DynamicBullets:FireBullet(owner, SWEP, pos, vel, cb)
 	local bul = self:DynamicBullets(owner, SWEP, pos, vel)
 	local entries = self.BulletEntries
@@ -414,7 +416,11 @@ function DynamicBullets:FireBullet(owner, SWEP, pos, vel, cb)
 	end
 
 	-- Store for calculations
-	entries[#entries + 1] = bul
+	if owner == LocalPlayer() then
+		Local_BulletEntries[#Local_BulletEntries + 1] = bul
+	else
+		entries[#entries + 1] = bul
+	end
 end
 
 net.Receive('DynamicBullets.Fired', function()
@@ -439,7 +445,7 @@ end)
 hook.Add('FinishMove', 'DynamicBullets.CalcPredicted', function(pl, mv)
     if pl ~= LocalPlayer() then return end
     local ct = CurTime()
-    local entries = DynamicBullets.BulletEntries
+    local entries = Local_BulletEntries
     local removals = 0
 
     local calcs, tickseng, ticks = 1, engine.TickInterval(), 1
@@ -449,11 +455,11 @@ hook.Add('FinishMove', 'DynamicBullets.CalcPredicted', function(pl, mv)
         ticks = ticks / calcs
     end
 
+	pl:LagCompensation(true)
     for k = 1, #entries do
         k = k - removals
         local v = entries[k]
         if not v or v.owner ~= pl then continue end
-        pl:LagCompensation(true)
         for c=1, calcs do
             local died = v:Calculate(ct - (ticks * calcs) + (c * ticks))
             if died then
@@ -471,8 +477,8 @@ hook.Add('FinishMove', 'DynamicBullets.CalcPredicted', function(pl, mv)
                 }
             end
         end
-        pl:LagCompensation(false)
     end
+	pl:LagCompensation(false)
 end)
 
 -- For other players, this does not require predictions since the server is sending this to us

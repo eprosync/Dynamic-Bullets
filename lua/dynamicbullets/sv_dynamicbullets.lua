@@ -371,7 +371,15 @@ function DynamicBullets:FireBullet(owner, SWEP, pos, vel, cb)
 	end
 
 	-- Store for calculations
-	entries[#entries + 1] = bul
+	if not owner.dbulletentires then
+		owner.dbulletentires = {}
+	end
+
+	if owner:IsPlayer() then
+		owner.dbulletentires[#owner.dbulletentires + 1] = bul
+	else
+		entries[#entries + 1] = bul
+	end
 end
 
 -- Pretty self explanitory, calculates the bullets server-side.
@@ -379,7 +387,8 @@ end
 -- Or else we end up with a game like Phantom Forces from roblox
 -- Which by the ways, has wayyyy too many cheaters
 hook.Add('FinishMove', 'DynamicBullets.Calc', function(pl, mv)
-    local entries = DynamicBullets.BulletEntries
+    local entries = pl.dbulletentires
+	if not entries then return end
     local ct = CurTime()
     local calcs, ticks = 1, engine.TickInterval()
     if DynamicBullets.MultiCalc then
@@ -388,11 +397,11 @@ hook.Add('FinishMove', 'DynamicBullets.Calc', function(pl, mv)
     end
 
     local removals = 0
+	pl:LagCompensation(true)
     for k = 1, #entries do
         k = k - removals
         local v = entries[k]
         if not v or v.owner ~= pl then continue end
-        pl:LagCompensation(true)
         for c=1, calcs do
             local died = v:Calculate(ct - (ticks * calcs) + (c * ticks))
             if died then
@@ -401,8 +410,8 @@ hook.Add('FinishMove', 'DynamicBullets.Calc', function(pl, mv)
                 break
             end
         end
-        pl:LagCompensation(false)
     end
+	pl:LagCompensation(false)
 end)
 
 -- Non players do not need prediction, ever...
