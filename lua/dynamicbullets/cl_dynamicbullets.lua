@@ -125,11 +125,8 @@ function DynamicBullets:DynamicBullets(owner, SWEP, pos, vel)
 		as this entire system is very delicate with it.
     ]]
 	function DynamicBul:PhysicCalc()
-		local acc = .5 * DynamicBullets.Fg * (self.time * self.time)
-		local displace = (self.vel * self.time) + (acc)
-		local newvel = self.vel + (DynamicBullets.Fg * self.time)
-        local dir = displace:GetNormalized()
-		return acc, displace, newvel, dir
+		local fg = DynamicBullets.Fg
+		return (self.vel * self.time) + (.5 * fg * (self.time * self.time)), self.vel + (fg * self.time)
 	end
 
     --[[
@@ -304,11 +301,11 @@ function DynamicBullets:DynamicBullets(owner, SWEP, pos, vel)
 		self.time = self.curtime - self.lasttime
 		if self.time == 0 then return false end
 
-		local acc, displace, newvel, dir = self:PhysicCalc()
+		local displace, newvel = self:PhysicCalc()
 
 		self.lasttime = self.curtime
 		self.lastpos = self.pos
-		self.dir = dir
+		self.dir = displace:GetNormalized()
 
         -- We need to trace so that we know if we hit anything, duh
 		local trace = util.TraceLine({
