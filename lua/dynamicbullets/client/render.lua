@@ -29,8 +29,8 @@ hook.Add('PreDrawTranslucentRenderables', 'DynamicBullets.Render', function()
         if v.pos ~= v.lastpos then
 			render.SetMaterial(trail)
 			render.StartBeam( 2 )
-			render.AddBeam(v.render.lerpvec + v.render.approachvec, 4, 0, Color(200, 145, 0))
-			render.AddBeam(v.render.lerplastvec + v.render.approachvec, 4, 1, Color(200, 145, 0))
+			render.AddBeam(v.render.lerpvec + v.render.approachvec, 2, 0, Color(200, 145, 0))
+			render.AddBeam(v.render.lerplastvec + v.render.approachvec, 2, 1, Color(200, 145, 0))
 			render.EndBeam()
         end
     end
@@ -57,8 +57,8 @@ hook.Add('PreDrawTranslucentRenderables', 'DynamicBullets.Render', function()
         if v.pos ~= v.lastpos then
 			render.SetMaterial(trail)
 			render.StartBeam( 2 )
-			render.AddBeam(v.render.lerplastvec + v.render.approachvec, 8, 0, Color(200, 145, 0))
-			render.AddBeam(v.render.lerpvec + v.render.approachvec, 8, 1, Color(200, 145, 0))
+			render.AddBeam(v.render.lerplastvec + v.render.approachvec, 2, 0, Color(200, 145, 0))
+			render.AddBeam(v.render.lerpvec + v.render.approachvec, 2, 1, Color(200, 145, 0))
 			render.EndBeam()
         end
     end
