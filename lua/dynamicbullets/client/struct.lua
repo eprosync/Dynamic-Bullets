@@ -27,6 +27,7 @@ function DynamicBullets.CLStruct(BulletStruct)
         Ricochet = ricochet,
     }
 
+	BulletStruct.bulletcolor = Color(200, 145, 0)
     BulletStruct.render = { -- simple rendering stuff, make bullets fancy :D
         lerpvec = false,
         lerplastvec = false,
