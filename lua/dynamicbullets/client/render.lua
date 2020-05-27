@@ -22,15 +22,15 @@ hook.Add('PreDrawTranslucentRenderables', 'DynamicBullets.Render', function()
             v.render.lerplastvec = v.lastpos
             v.render.approachvec = Vec0
         end
-        v.render.lerpvec = LerpVector(FrameTime() * 18, v.render.lerpvec, v.pos)
-        v.render.lerplastvec = LerpVector(FrameTime() * 40, v.render.lerplastvec, v.render.lerpvec)
+        v.render.lerpvec = LerpVector(FrameTime() * 20, v.render.lerpvec, v.pos)
+        v.render.lerplastvec = LerpVector(FrameTime() * 20, v.render.lerplastvec, v.render.lerpvec)
         v.render.approachvec = LerpVector(FrameTime() * 5, v.render.approachvec, Vec0)
 
         if v.pos ~= v.lastpos then
 			render.SetMaterial(trail)
 			render.StartBeam( 2 )
-			render.AddBeam(v.render.lerpvec + v.render.approachvec, 2, 0, Color(200, 145, 0))
-			render.AddBeam(v.render.lerplastvec + v.render.approachvec, 2, 1, Color(200, 145, 0))
+			render.AddBeam(v.render.lerpvec + v.render.approachvec, 3, 0, Color(200, 145, 0))
+			render.AddBeam(v.render.lerplastvec + v.render.approachvec, 3, 1, Color(200, 145, 0))
 			render.EndBeam()
         end
     end
@@ -50,15 +50,15 @@ hook.Add('PreDrawTranslucentRenderables', 'DynamicBullets.Render', function()
             v.render.lerplastvec = v.lastpos
             v.render.approachvec = Vec0
         end
-        v.render.lerpvec = LerpVector(FrameTime() * 14, v.render.lerpvec, v.pos)
-        v.render.lerplastvec = LerpVector(FrameTime() * 50, v.render.lerplastvec, v.render.lerpvec)
+        v.render.lerpvec = LerpVector(FrameTime() * 20, v.render.lerpvec, v.pos)
+        v.render.lerplastvec = LerpVector(FrameTime() * 20, v.render.lerplastvec, v.render.lerpvec)
         v.render.approachvec = LerpVector(FrameTime() * 2, v.render.approachvec, Vec0)
 
         if v.pos ~= v.lastpos then
 			render.SetMaterial(trail)
 			render.StartBeam( 2 )
-			render.AddBeam(v.render.lerplastvec + v.render.approachvec, 2, 0, Color(200, 145, 0))
-			render.AddBeam(v.render.lerpvec + v.render.approachvec, 2, 1, Color(200, 145, 0))
+			render.AddBeam(v.render.lerplastvec + v.render.approachvec, 3, 0, Color(200, 145, 0))
+			render.AddBeam(v.render.lerpvec + v.render.approachvec, 3, 1, Color(200, 145, 0))
 			render.EndBeam()
         end
     end
