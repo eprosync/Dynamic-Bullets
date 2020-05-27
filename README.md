@@ -9,6 +9,7 @@
 
 # How to get this working on your weapon base!
  Since some weapon bases vary on how bullets even functions, I'll let you decide
+ 
  Some examples on how to use this properly
 
  SWB/CW 2.0/FAS 2.0/Cosmic's Weapon Base (Hi Anthony :D)
@@ -35,6 +36,7 @@ if self.DynamicBullets then
 end
 ```
  If you lazy you can just do this
+ 
  However this will increase the networking for each bullet by about 1-2 kb-ish
 ```
 DynamicBullets:FireBullet(self.Owner, self, sp, Dir2, function(bullet)
