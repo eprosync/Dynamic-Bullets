@@ -72,12 +72,12 @@ hook.Add('FinishMove', 'DynamicBullets.CalcPredicted', function(pl, mv)
     local calcs, tickseng, ticks = 1, engine.TickInterval(), 1
     if DynamicBullets.MultiCalc then
         calcs = DynamicBullets.MultiCalc
-        ticks = tickseng
-        ticks = ticks / calcs
+        ticks = tickseng / calcs
     end
 	
+	DynamicBullets.Profiling_Start('BulletCalc_Player')
 	pl:LagCompensation(true)
-    for k = 1, #entries do
+    for k = 1, entries_len do
         k = k - removals
         local v = entries[k]
         if not v or v.owner ~= pl then continue end
@@ -100,21 +100,28 @@ hook.Add('FinishMove', 'DynamicBullets.CalcPredicted', function(pl, mv)
         end
     end
 	pl:LagCompensation(false)
+    DynamicBullets.Profiling_Push('BulletCalc_Player')
+	if entries_len - removals < 1 and DynamicBullets.Debug then
+		local traces = DynamicBullets.Profiling_GetLength('BulletCalc_Player')
+		DynamicBullets.DBGPrint('Avg Player Calc Time: ' .. DynamicBullets.Profiling_End('BulletCalc_Player') .. ' (' .. traces .. ' Traces, ' .. ((1/tickseng) + DynamicBullets.MultiCalc - 1) .. ' Calcs/s)')
+	end
 end)
 
 hook.Add('Tick', 'DynamicBullets.Calc', function()
-    local LP = LocalPlayer()
     local entries = DynamicBullets.BulletEntries
+	local entries_len = #entries
+	if entries_len < 1 then return end
+	local LP = LocalPlayer()
     local removals = 0
 
     local calcs, tickseng, ticks = 1, engine.TickInterval(), 1
     if DynamicBullets.MultiCalc then
         calcs = DynamicBullets.MultiCalc
-        ticks = tickseng
-        ticks = ticks / calcs
+        ticks = tickseng / calcs
     end
 
-    for k = 1, #entries do
+	DynamicBullets.Profiling_Start('BulletCalc_NonPlayer')
+    for k = 1, entries_len do
         k = k - removals
         local v = entries[k]
         if not v or v.owner == LP then continue end
@@ -141,4 +148,9 @@ hook.Add('Tick', 'DynamicBullets.Calc', function()
             end
         end
     end
+    DynamicBullets.Profiling_Push('BulletCalc_NonPlayer')
+	if entries_len - removals < 1 and DynamicBullets.Debug then
+		local traces = DynamicBullets.Profiling_GetLength('BulletCalc_NonPlayer')
+		DynamicBullets.DBGPrint('Avg Non-Player Calc Time: ' .. DynamicBullets.Profiling_End('BulletCalc_NonPlayer') .. ' (' .. traces .. ' Traces, ' .. ((1/tickseng) + DynamicBullets.MultiCalc - 1) .. ' Calcs/s)')
+	end
 end)

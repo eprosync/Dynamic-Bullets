@@ -2,6 +2,7 @@
 local trail = Material('effects/laser_tracer')
 local head = Material('sprites/light_ignorez')
 local enginetick = engine.TickInterval()
+local Vec0 = Vector()
 hook.Add('PreDrawTranslucentRenderables', 'DynamicBullets.Render', function()
     local entries = DynamicBullets.BulletEntries
     local max_renderdistance = DynamicBullets.RenderDistance

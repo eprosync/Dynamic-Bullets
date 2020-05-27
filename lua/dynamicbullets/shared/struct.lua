@@ -1,4 +1,4 @@
-hook.Add('DynamicBullets.CreateStruct', 'SHStruct', function(BulletStruct)
+function DynamicBullets.SHStruct(BulletStruct)
 	function BulletStruct:SetVelocity(vel)
 		self.vel = self.vel:GetNormalized() * vel
 	end
@@ -27,7 +27,7 @@ hook.Add('DynamicBullets.CreateStruct', 'SHStruct', function(BulletStruct)
 	end
 
 	function BulletStruct:RandSeed()
-		return math.Round(self.originpos.x + self.originpos.y + self.originpos.z + originvel.x + originvel.y + originvel.z)
+		return math.Round(self.originpos.x + self.originpos.y + self.originpos.z + self.originvel.x + self.originvel.y + self.originvel.z)
 	end
 
 	function BulletStruct:CanPenetrate(trace, dot)
@@ -66,8 +66,10 @@ hook.Add('DynamicBullets.CreateStruct', 'SHStruct', function(BulletStruct)
 			self.pos = trace.HitPos
 
 			local penDist = (penlen - trace.HitPos:Distance(hit_pos))
-			weaponattributes.force = weaponattributes.force * (penDist / penlen) * 0.75
-			weaponattributes.dmgmul = weaponattributes.dmgmul * (penDist / penlen) * 0.75
+			if SERVER then
+				weaponattributes.force = weaponattributes.force * (penDist / penlen) * 0.75
+				weaponattributes.dmgmul = weaponattributes.dmgmul * (penDist / penlen) * 0.75
+			end
 			self.vel = self.vel * (penDist / penlen) * 0.85
 
 			self.LayersPenetrated = self.LayersPenetrated + 1
@@ -143,6 +145,8 @@ hook.Add('DynamicBullets.CreateStruct', 'SHStruct', function(BulletStruct)
 				return true
 			end
 
+            local dir = self.vel:GetNormalized()
+
 			if CLIENT then
 				self:EffectSurface(self.lastpos, dir, displace:Length())
 			end
@@ -178,4 +182,4 @@ hook.Add('DynamicBullets.CreateStruct', 'SHStruct', function(BulletStruct)
 	end
 	function BulletStruct:Sync(override)
 	end
-end)
+end

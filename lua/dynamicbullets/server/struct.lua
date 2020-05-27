@@ -31,7 +31,7 @@ hook.Add('DynamicBullets.CreateStruct', 'SVStruct', function(BulletStruct)
 		local dmg = self:CalculateDamage((self.pos - self.originpos):Length())
 
 		local dmginfo = DamageInfo()
-		local magnitude = self.vel:Length()
+		local magnitude, dir = self.vel:Length(), self.vel:GetNormalized()
 		dmginfo:SetAttacker( self.owner )
 		dmginfo:SetInflictor( self.inflictor )
 		dmginfo:SetDamage( dmg )
@@ -69,8 +69,8 @@ hook.Add('DynamicBullets.CreateStruct', 'SVStruct', function(BulletStruct)
         net.Start('DynamicBullets.Fired', true)
         net.WriteEntity(self.owner)
         net.WriteEntity(self.inflictor)
-        net.WriteString(pos.x .. '|' .. pos.y .. '|' .. pos.z)
-        net.WriteString(vel.x .. '|' .. vel.y .. '|' .. vel.z)
+        net.WriteString(self.originpos.x .. '|' .. self.originpos.y .. '|' .. self.originpos.z)
+        net.WriteString(self.originvel.x .. '|' .. self.originvel.y .. '|' .. self.originvel.z)
         if not override then
             if self:WriteAttributes() == false then
                 override = true
@@ -78,7 +78,7 @@ hook.Add('DynamicBullets.CreateStruct', 'SVStruct', function(BulletStruct)
         end
         net.WriteBool(override)
         if self.owner:IsPlayer() then
-            net.SendOmit(owner)
+            net.SendOmit(self.owner)
         else
             net.Broadcast()
         end

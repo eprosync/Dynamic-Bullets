@@ -46,6 +46,8 @@ local function CreateStruct()
 		CanRicochet = false,
 		NoRicochet = NoRicochet
 	}
+
+	DynamicBullets.SHStruct(BulletStruct)
 	
 	hook.Run('DynamicBullets.CreateStruct', BulletStruct)
 
@@ -64,6 +66,7 @@ function DynamicBullets:DynamicBullet(owner, SWEP, pos, vel)
 	struct.lastpos = pos
 	struct.owner = owner
 	struct.vel = vel * 40000
+	struct.originvel = struct.vel
 	return struct
 end
 

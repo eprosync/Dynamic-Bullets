@@ -28,12 +28,13 @@ function DynamicBullets.Print(str)
 end
 
 function DynamicBullets.DBGPrint(str)
+    if not DynamicBullets.Debug then return end
     MsgC(Green, 'Dynamic Bullets', White, ' | ', Red, 'Debug', White, ' -> ' .. str .. '\n')
 end
 
 DynamicBullets.Print('Loading crap...')
 
-DynamicBullets.IncludeSV('dynamicbullets/config.lua')
+DynamicBullets.IncludeSH('dynamicbullets/config.lua')
 
 local Files, Folders
 Files, Folders = file.Find('dynamicbullets/shared/*.lua', 'LUA')

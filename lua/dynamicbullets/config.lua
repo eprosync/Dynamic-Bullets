@@ -24,11 +24,11 @@ DynamicBullets.Gravity = Vector(0, 0, -(4 * 514.43569553806)) -- This is acceler
 -- Distributes curtime into multiple calculation instances.
 -- This allows more accurate calculations for when hitting objects and etc.
 -- I suggest doing this when at a low tick like 33 - 11 as this will increase the need for more resources
-DynamicBullets.MultiCalc = 8
+DynamicBullets.MultiCalc = 4
 
 -- Rendering habbits, ya know for FPS
 DynamicBullets.RenderDistance = 15000*15000
 DynamicBullets.MaxRenders = 60
 
 -- For debugging bullet travel and velocity
-DynamicBullets.Debug = false
+DynamicBullets.Debug = true
