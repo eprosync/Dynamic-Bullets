@@ -1,10 +1,6 @@
-local _pairs = pairs
-local _print = print
-local _math_floor = math.floor
-local _SysTime = SysTime
 local function math_Round( num, idp )
 	local mult = 10 ^ ( idp or 0 )
-	return _math_floor( num * mult + 0.5 ) / mult
+	return math.floor( num * mult + 0.5 ) / mult
 end
 
 local Profiling_Clock = {}
@@ -12,10 +8,10 @@ function DynamicBullets.Profiling_Start(profile)
     if not DynamicBullets.Debug then return end
     local profileclock = Profiling_Clock[profile]
     if profileclock then
-        profileclock[#profileclock + 1] = _SysTime()
+        profileclock[#profileclock + 1] = SysTime()
         return
     end
-    Profiling_Clock[profile] = {_SysTime()}
+    Profiling_Clock[profile] = {SysTime()}
 end
 
 function DynamicBullets.Profiling_End(profile)
@@ -40,7 +36,7 @@ function DynamicBullets.Profiling_Push(profile)
     if profileclock then
         local profilelen = #profileclock
         local curprofile = profileclock[profilelen]
-        local result = _SysTime() - curprofile
+        local result = SysTime() - curprofile
         profileclock[profilelen] = result
         return math_Round(result, 6)
     end
