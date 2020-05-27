@@ -1,4 +1,4 @@
-hook.Add('DynamicBullets.CreateStruct', 'SVStruct', function(BulletStruct)
+function DynamicBullets.SVStruct(BulletStruct)
     local BulletAttributes = table.Copy(BulletStruct.weaponattributes)
 
     BulletStruct.weaponattributes.dmgmax = 1
@@ -83,4 +83,4 @@ hook.Add('DynamicBullets.CreateStruct', 'SVStruct', function(BulletStruct)
             net.Broadcast()
         end
 	end
-end)
+end

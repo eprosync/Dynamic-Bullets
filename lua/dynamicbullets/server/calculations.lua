@@ -3,14 +3,15 @@ util.AddNetworkString('DynamicBullets.Fired')
 function DynamicBullets:FireBullet(owner, SWEP, pos, vel, cb)
 	local bul = self:DynamicBullet(owner, SWEP, pos, vel)
 	local entries = self.BulletEntries
+    local override
+
 	if cb then
-		cb(bul)
+		override = cb(bul)
 	end
 
-	local override = hook.Run('DynamicBullets.Fired', bul)
-	if not override then
-		bul:Sync()
-	end
+	if hook.Run('DynamicBullets.Fired', bul) and not override then
+        override = true
+    end
 
 	if not owner.dbulletentires then
 		owner.dbulletentires = {}

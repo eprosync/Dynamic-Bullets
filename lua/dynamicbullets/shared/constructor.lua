@@ -48,6 +48,11 @@ local function CreateStruct()
 	}
 
 	DynamicBullets.SHStruct(BulletStruct)
+	if CLIENT then
+		DynamicBullets.CLStruct(BulletStruct)
+	else
+		DynamicBullets.SVStruct(BulletStruct)
+	end
 	
 	hook.Run('DynamicBullets.CreateStruct', BulletStruct)
 

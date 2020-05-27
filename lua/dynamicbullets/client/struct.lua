@@ -21,7 +21,7 @@ local ricochet = {
 	"weapons/fx/rics/ric5.wav",
 }
 
-hook.Add('DynamicBullets.CreateStruct', 'CLStruct', function(BulletStruct)
+function DynamicBullets.CLStruct(BulletStruct)
     BulletStruct.Sounds = {
         NearMiss = nearmiss,
         Ricochet = ricochet,
@@ -78,4 +78,4 @@ hook.Add('DynamicBullets.CreateStruct', 'CLStruct', function(BulletStruct)
 			self.weaponattributes[v[1]] = v[2]
 		end
 	end
-end)
+end

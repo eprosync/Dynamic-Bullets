@@ -28,11 +28,16 @@ function DynamicBullets:FireBullet(owner, SWEP, pos, vel, cb)
         end
     end
 
+    local override
+
 	if cb then
-		cb(bul)
+		override = cb(bul)
 	end
 
-	local override = hook.Run('DynamicBullets.Fired', bul)
+	if hook.Run('DynamicBullets.Fired', bul) and not override then
+        override = true
+    end
+
 	if not override then
 		bul:Sync()
 	end
