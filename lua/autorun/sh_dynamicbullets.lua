@@ -74,7 +74,7 @@ local PenetrationSurfaces = {
 	[MAT_METAL] = 0.6,
 	[MAT_TILE] = 0.9,
 	[MAT_WOOD] = 0.9,
-	[MAT_FLESH] = 0.95
+	[MAT_FLESH] = 1.1
 }
 
 DynamicBullets.DebugTable = {}

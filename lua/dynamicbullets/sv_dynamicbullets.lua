@@ -114,8 +114,8 @@ function DynamicBullets:DynamicBullets(owner, SWEP, pos, vel)
 		as this entire system is very delicate with it.
     ]]
 	function DynamicBul:PhysicCalc()
-		local fg = DynamicBullets.Fg
-		return (self.vel * self.time) + (.5 * fg * (self.time * self.time)), self.vel + (fg * self.time)
+		local fg, time, curvel = DynamicBullets.Fg, self.time, self.vel
+		return (curvel * time) + (.5 * fg * (time * time)), curvel + (fg * time)
 	end
 
     --[[
@@ -218,7 +218,7 @@ function DynamicBullets:DynamicBullets(owner, SWEP, pos, vel)
     ]]
 	function DynamicBul:DamageEntity(trace)
 		-- Calculate the bullet damage based on the distance travelled
-		local dmg = self:CalculateDamage(math.sqrt(self.distancetraveledsqr))
+		local dmg = self:CalculateDamage((self.pos - self.originpos):Length())
 
 		-- Mimics damage taken from engine bullets
 		local dmginfo = DamageInfo()
@@ -279,11 +279,8 @@ function DynamicBullets:DynamicBullets(owner, SWEP, pos, vel)
 			mask = MASK_SHOT
 		})
 
-		local _dist = displace:LengthSqr()
-
 		self.pos = (self.pos + displace)
 		self.vel = newvel
-		self.distancetraveledsqr = self.distancetraveledsqr + _dist
 
         -- In theory all this penetration calculations i made should work aswell.
 		if trace.Hit and trace.HitPos ~= self.lastpos then

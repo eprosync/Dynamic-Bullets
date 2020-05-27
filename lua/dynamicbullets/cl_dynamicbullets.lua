@@ -477,7 +477,7 @@ hook.Add('FinishMove', 'DynamicBullets.CalcPredicted', function(pl, mv)
                     ["start"] = v.lastpos,
                     ["end"] = v.pos,
                     ["color"] = Color(255,255,255),
-                    ["time"] = (ct - (ticks * calcs) + (c * ticks)) + 4
+                    ["time"] = (ct - (ticks * calcs) + (c * ticks)) + 1
                 }
             end
         end
@@ -521,7 +521,7 @@ hook.Add('Tick', 'DynamicBullets.Calc', function()
                     ["start"] = v.lastpos,
                     ["end"] = v.pos,
                     ["color"] = Color(255,0,0),
-                    ["time"] = (ct - (ticks * calcs) + (c * ticks)) + 4
+                    ["time"] = (ct - (ticks * calcs) + (c * ticks)) + 1
                 }
             end
         end
@@ -529,7 +529,9 @@ hook.Add('Tick', 'DynamicBullets.Calc', function()
 end)
 
 -- Simple renderer for bullets, make things look nice :)
-local mat = Material('sprites/light_ignorez')
+--effects/laser_tracer
+local trail = Material('effects/laser_tracer') --sprites/light_ignorez
+local head = Material('sprites/light_ignorez')
 local enginetick = engine.TickInterval()
 hook.Add('PreDrawTranslucentRenderables', 'DynamicBullets.Render', function()
     local entries = DynamicBullets.BulletEntries
@@ -552,9 +554,14 @@ hook.Add('PreDrawTranslucentRenderables', 'DynamicBullets.Render', function()
         v.render.approachvec = LerpVector(FrameTime() * 5, v.render.approachvec, Vec0)
 
         if v.pos ~= v.lastpos then
-            render.DrawLine( v.render.lerplastvec + v.render.approachvec, v.render.lerpvec + v.render.approachvec, Color( 200, 145, 0 ) )
-            render.SetMaterial(mat)
-            render.DrawSprite( v.render.lerpvec + v.render.approachvec, 25, 25, Color( 200, 145, 0 ) )
+			render.SetMaterial(trail)
+			render.StartBeam( 2 )
+			render.AddBeam(v.render.lerpvec + v.render.approachvec, 4, 0, Color(200, 145, 0))
+			render.AddBeam(v.render.lerplastvec + v.render.approachvec, 4, 1, Color(200, 145, 0))
+			render.EndBeam()
+
+            --[[render.SetMaterial(head)
+            render.DrawSprite( v.render.lerpvec + v.render.approachvec, 25, 25, Color( 200, 145, 0 ) )]]
         end
     end
 
@@ -572,14 +579,19 @@ hook.Add('PreDrawTranslucentRenderables', 'DynamicBullets.Render', function()
             v.render.lerplastvec = v.lastpos
             v.render.approachvec = Vec0
         end
-        v.render.lerpvec = LerpVector(FrameTime() * 18, v.render.lerpvec, v.pos)
-        v.render.lerplastvec = LerpVector(FrameTime() * 40, v.render.lerplastvec, v.render.lerpvec)
-        v.render.approachvec = LerpVector(FrameTime() * 5, v.render.approachvec, Vec0)
+        v.render.lerpvec = LerpVector(FrameTime() * 14, v.render.lerpvec, v.pos)
+        v.render.lerplastvec = LerpVector(FrameTime() * 50, v.render.lerplastvec, v.render.lerpvec)
+        v.render.approachvec = LerpVector(FrameTime() * 2, v.render.approachvec, Vec0)
 
         if v.pos ~= v.lastpos then
-            render.DrawLine( v.render.lerplastvec + v.render.approachvec, v.render.lerpvec + v.render.approachvec, Color( 200, 145, 0 ) )
-            render.SetMaterial(mat)
-            render.DrawSprite( v.render.lerpvec + v.render.approachvec, 25, 25, Color( 200, 145, 0 ) )
+			render.SetMaterial(trail)
+			render.StartBeam( 2 )
+			render.AddBeam(v.render.lerplastvec + v.render.approachvec, 8, 0, Color(200, 145, 0))
+			render.AddBeam(v.render.lerpvec + v.render.approachvec, 8, 1, Color(200, 145, 0))
+			render.EndBeam()
+
+            --[[render.SetMaterial(head)
+            render.DrawSprite( v.render.lerpvec + v.render.approachvec, 25, 25, Color( 200, 145, 0 ) )]]
         end
     end
 end)
