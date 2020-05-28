@@ -10,7 +10,7 @@ hook.Add('PreDrawTranslucentRenderables', 'DynamicBullets.Render', function()
 
     for k = 1, #entries do
         local v = entries[k]
-        if v.curtime < enginetick/6 then continue end
+        if v.norender or v.curtime < enginetick/6 then continue end
 		if k > max_renders or v.pos:DistToSqr(EyePos()) > max_renderdistance then continue end
         if v.renderer then
             v.renderer()
@@ -40,7 +40,7 @@ hook.Add('PreDrawTranslucentRenderables', 'DynamicBullets.Render', function()
     local Local_BulletEntries = DynamicBullets.Local_BulletEntries
     for k = 1, #Local_BulletEntries do
         local v = Local_BulletEntries[k]
-        if v.curtime < enginetick/6 then continue end
+        if v.norender or v.curtime < enginetick/6 then continue end
 		if k > max_renders or v.pos:DistToSqr(EyePos()) > max_renderdistance then continue end
         if v.renderer then
             v.renderer()
