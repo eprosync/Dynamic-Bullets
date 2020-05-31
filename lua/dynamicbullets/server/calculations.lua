@@ -40,7 +40,7 @@ hook.Add('FinishMove', 'DynamicBullets.Calc', function(pl, mv)
     local removals = 0
 	DynamicBullets.Profiling_Start('BulletCalc_Player')
 	pl:LagCompensation(true)
-    for k = 1, #entries do
+    for k = 1, entries_len do
         k = k - removals
         local v = entries[k]
         if not v or v.owner ~= pl then continue end

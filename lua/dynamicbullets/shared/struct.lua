@@ -37,7 +37,7 @@ function DynamicBullets.SHStruct(BulletStruct)
 
 	function BulletStruct:PenetrateSurface(trace, dot)
 		local weaponattributes = self.weaponattributes
-		local dir = self.dir
+		local dir = self.vel:GetNormalized()
 		local penlen, hit_pos = weaponattributes.PenetrationStrength * (weaponattributes.PenetrationSurfaces[trace.MatType] and weaponattributes.PenetrationSurfaces[trace.MatType] or 1), trace.HitPos
 		local tr = {}
 		tr.start = hit_pos
@@ -119,15 +119,16 @@ function DynamicBullets.SHStruct(BulletStruct)
 		if self.time == 0 then return false end
 
 		local displace, newvel = self:PhysicCalc()
+		local newpos = self.pos + displace
 
+		self.vel = newvel
 		self.lasttime = self.curtime
 		self.lastpos = self.pos
-		self.dir = displace:GetNormalized()
 
         -- We need to trace so that we know if we hit anything, duh
 		local trace = util.TraceLine({
 			start = self.pos,
-			endpos = self.pos + displace,
+			endpos = newpos,
 			filter = self.owner,
 			mask = MASK_SHOT
 		})
@@ -136,8 +137,7 @@ function DynamicBullets.SHStruct(BulletStruct)
 			self:NearMissSound()
 		end
 
-		self.pos = (self.pos + displace)
-		self.vel = newvel
+		self.pos = newpos
 
         -- In theory all this penetration calculations i made should work aswell.
 		if trace.Hit and trace.HitPos ~= self.lastpos then
