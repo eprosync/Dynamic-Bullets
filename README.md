@@ -1,6 +1,8 @@
 ![GitHub issues](https://img.shields.io/github/issues/eprosync/Dynamic-Bullets)
 ![GitHub](https://img.shields.io/github/license/eprosync/Dynamic-Bullets)
 
+WARNING: THIS IS OUTDATED COMPARED TO THE BUILT-IN VERSION IN MWB
+
 # Dynamic-Bullets
  Yes, very dynamic!
  * This is a project funded by nobody but me, cause I'm a really bored individual.
